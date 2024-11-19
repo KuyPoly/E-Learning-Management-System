@@ -5,4 +5,4 @@ E-Learning Management System is a system design for students to study any course
   Teacher are allow to view their own information,add course, update or change course, add assignment, upload materials, grade and view their students progress.
 - Student
   Students are allow to enroll and drop in any course that are available, view course material and assigment, submit assignment, and view grade.
-- Hi Poly
+
