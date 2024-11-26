@@ -19,32 +19,7 @@ int ask_login() {
     return choice_login;
 }
 
-// Admin features menu
-void admin_menu(Admin& admin) {
-    int admin_choice;
-    do {
-        cout << "\nAdmin Menu" << endl;
-        cout << "Press 1 to Add User" << endl;
-        cout << "Press 2 to Delete User" << endl;
-        cout << "Press 3 to Logout" << endl;
-        cout << "Enter your choice: ";
-        cin >> admin_choice;
 
-        switch (admin_choice) {
-            case 1:
-                cout << "Add User functionality not implemented yet." << endl;
-                break;
-            case 2:
-                cout << "Delete User functionality not implemented yet." << endl;
-                break;
-            case 3:
-                cout << "Logging out..." << endl;
-                return; // Exit the admin menu
-            default:
-                cout << "Invalid choice. Please try again." << endl;
-        }
-    } while (true);
-}
 
 int main() {
     // Welcome message
@@ -70,7 +45,7 @@ int main() {
                     if (admin.login(username, password)) {
                         cout << "Login successful!" << endl;
                         logged_in = true;
-                        admin_menu(admin); // Go to Admin menu
+                        admin.admin_menu(); // Go to Admin menu
                         break;
                     } else {
                         cout << "Invalid username or password." << endl;
