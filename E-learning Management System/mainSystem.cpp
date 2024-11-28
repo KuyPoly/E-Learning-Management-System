@@ -19,7 +19,55 @@ int ask_login() {
     return choice_login;
 }
 
+// Function for Student Menu
+void studentMenu(Student& student) {
+    int choice;
+    do {
+        cout << "Student Menu: \n";
+        cout << "1. Change Password\n";
+        cout << "2. View Courses\n";
+        cout << "3. Submit Assignment\n";
+        cout << "4. View Grades\n";
+        cout << "5. View Progress\n";
+        cout << "6. Logout\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
 
+        switch (choice) {
+            case 1: {
+                string newPassword;
+                cout << "Enter new password: ";
+                cin >> newPassword;
+                student.changePassword(newPassword);
+                break;
+            }
+            case 2:
+                student.viewCourseMaterials(student.courseMaterials);
+                break;
+            case 3: {
+                string courseName, assignmentName;
+                cout << "Enter course name: ";
+                cin >> courseName;
+                cout << "Enter assignment name: ";
+                cin >> assignmentName;
+                student.submitAssignment(courseName, assignmentName);
+                break;
+            }
+            case 4:
+                student.viewGrades();
+                break;
+            case 5:
+                // You might have a map of progress to display here
+                break;
+            case 6:
+                cout << "Logging out...\n";
+                break;
+            default:
+                cout << "Invalid choice.\n";
+                break;
+        }
+    } while (choice != 6);
+}
 
 int main() {
     // Welcome message

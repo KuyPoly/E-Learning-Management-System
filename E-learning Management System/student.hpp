@@ -18,16 +18,11 @@ public:
     // Constructor
     Student(const std::string& username, const std::string& password);
 
+    //Funtion
     bool login(const std::string& enteredUsername, const std::string& enteredPassword);
     void changePassword(const std::string& newPassword);
-    // View Grades
-    void viewGrades() {
-        std::cout << "Grades:\n";
-        for (const auto& course : grades) {
-            std::cout << "Course: " << course.first << " - Grade: " << course.second << "\n";
-        }
-    }
-    
+    void viewGrades();
+
     // View Assignments
     void viewAssignments(const std::map<std::string, std::vector<std::string>>& assignments) {
         for (const auto& course : assignments) {
