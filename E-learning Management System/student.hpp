@@ -20,8 +20,6 @@
         //Funtion
         bool login(const std::string&enteredUsername, const std::string& enteredPassword);
         void changePassword(const std::string& newPassword);
-        void enrollIncourse(const std::string& courseName);
-        void dropCourse(const std::string& courseName);
         void viewAssignments(const std::map<std::string, std::vector<std::string>>& assignments);
         void viewCourseMaterials(const std::map<std::string, std::vector<std::string>>& courseMaterials);
         void viewGrades(const std::map<std::string, std::string>&grades);
