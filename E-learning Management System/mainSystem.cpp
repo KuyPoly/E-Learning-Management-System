@@ -42,7 +42,7 @@ void studentMenu(Student& student) {
                 break;
             }
             case 2:
-                student.viewCourseMaterials(student.courseMaterials);
+                student.viewCourseMaterials();
                 break;
             case 3: {
                 string courseName, assignmentName;

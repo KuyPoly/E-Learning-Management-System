@@ -34,7 +34,7 @@ public:
     }
 
     // View Course Materials
-    void viewCourseMaterials(const std::map<std::string, std::vector<std::string>>& courseMaterials) {
+    void viewCourseMaterials() {
         for (const auto& course : courseMaterials) {
             std::cout << "Course: " << course.first << "\nMaterials:\n";
             for (const auto& material : course.second) {
