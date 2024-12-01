@@ -109,9 +109,27 @@ int main() {
                 } while (!logged_in); // Keep looping until login is successful or user chooses to exit
                 break;
             }
-            case 2:
-                cout << "Student functionality not implemented yet." << endl;
+
+            case 2: {  
+                // Student login
+                string username, password;
+                cout << "Enter your username: ";
+                cin >> username;
+                cout << "Enter your password: ";
+                cin >> password;
+
+                // Create student with predefined data (can be replaced with dynamic login)
+                Student student(username, password);
+                bool logged_in = student.login(username, password);
+                
+                if (logged_in) {
+                    cout << "Login successful!\n";
+                    studentMenu(student);  // Call the student menu after successful login
+                } else {
+                    cout << "Invalid username or password.\n";
+                }
                 break;
+            }
             case 3:
                 cout << "Teacher functionality not implemented yet." << endl;
                 break;
