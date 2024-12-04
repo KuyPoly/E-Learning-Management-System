@@ -1,12 +1,12 @@
-#ifndef STUDENT
-#define STUDENT
+#ifndef STUDENT_HPP
+#define STUDENT_HPP
 #include <iostream>
 #include <string>
 #include "../utils/file.h"
 #include "../utils/validate.h"
 
 void viewEnrolledCourses(const string &studentName) {
-    ifstream file("../course.csv");
+    ifstream file("../courses.csv");
     if (!file.is_open()) {
         cout << "Error: Could not open file courses.csv" << endl;
         return;

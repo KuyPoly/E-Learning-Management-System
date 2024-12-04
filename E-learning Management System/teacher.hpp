@@ -1,5 +1,5 @@
-#ifndef TEACHER
-#define TEACHER
+#ifndef TEACHER_HPP
+#define TEACHER_HPP
 #include "../utils/file.h"
 #include "../utils/validate.h"
 

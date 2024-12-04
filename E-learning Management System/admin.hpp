@@ -1,5 +1,5 @@
-#ifndef ADMIN
-#define ADMIN
+#ifndef ADMIN_HPP
+#define ADMIN_HPP
 #include "../utils/file.h"
 #include "../utils/validate.h"
 
