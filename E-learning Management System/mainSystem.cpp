@@ -29,6 +29,7 @@ void studentMenu(Student& student) {
         cout << "3. Submit Assignment\n";
         cout << "4. View Grades\n";
         cout << "5. View Progress\n";
+        cout << "6. Display User Information\n";
         cout << "6. Logout\n";
         cout << "Enter your choice: ";
         cin >> choice;
@@ -57,16 +58,19 @@ void studentMenu(Student& student) {
                 student.viewGrades();
                 break;
             case 5:
-                // You might have a map of progress to display here
+                student.viewProgress();
                 break;
             case 6:
+                student.displayInfo();
+                break;
+            case 7:
                 cout << "Logging out...\n";
                 break;
             default:
                 cout << "Invalid choice.\n";
                 break;
         }
-    } while (choice != 6);
+    } while (choice != 7);
 }
 
 int main() {

@@ -13,15 +13,56 @@ private:
     std::map<std::string, std::vector<std::string>> courseMaterials; // Maps course names to their materials
     std::map<std::string, std::string> grades; // Maps course names to grades
     std::map<std::string, std::vector<std::string>> submittedAssignments; // Maps course names to submitted assignments
+    std::map<std::string, int> progress; // Track course progress in percentage
 
 public:
-    // Constructor
-    Student(const std::string& username, const std::string& password);
+    static std::map<std::string, Student> students;
 
-    //Funtion
-    bool login(const std::string& enteredUsername, const std::string& enteredPassword);
-    void changePassword(const std::string& newPassword);
-    void viewGrades();
+    // Constructor
+    Student() = default;
+    Student(const std::string& username, const std::string& password)
+        : username(username), password(password) {}
+
+    // Static function to load students from a CSV file
+    static void loadStudentsFromCSV(const std::string& filename) {
+        std::ifstream file(filename);
+        if (!file.is_open()) {
+            std::cerr << "Error: Unable to open file " << filename << std::endl;
+            return;
+        }
+        std::string line, username, name;
+        while (getline(file, line)) {
+            std::stringstream ss(line);
+            getline(ss, username, ','); // Read username
+            getline(ss, name, ',');     // Read name
+            students[username] = Student(username, username); // Default password = username
+        }
+        file.close();
+        std::cout << "Students loaded from " << filename << std::endl;
+    }
+
+//Funtions
+    // Login function
+    bool login(const std::string& enteredUsername, const std::string& enteredPassword){
+        return this->username == enteredUsername && this->password == enteredPassword;
+    }
+
+    // Change password
+    void changePassword(const std::string& newPassword){
+        password = newPassword;
+        std::cout << "Password successfully changed!\n";
+    }
+
+    // View grades
+    void viewGrades() {
+        if (grades.empty()) {
+            std::cout << "No grades available.\n";
+        } else {
+            for (const auto& course : grades) {
+                std::cout << "Course: " << course.first << " - Grade: " << course.second << "\n";
+            }
+        }
+    }
 
     // View Assignments
     void viewAssignments(const std::map<std::string, std::vector<std::string>>& assignments) {
@@ -62,9 +103,13 @@ public:
     }
 
     // View Progress
-    void viewProgress(const std::map<std::string, int>& progress) {
-        for (const auto& course : progress) {
-            std::cout << "Course: " << course.first << " - Progress: " << course.second << "%\n";
+    void viewProgress() {
+        if (progress.empty()) {
+            std::cout << "No progress data available.\n";
+        } else {
+            for (const auto& course : progress) {
+                std::cout << "Course: " << course.first << " - Progress: " << course.second << "%\n";
+            }
         }
     }
 
@@ -79,5 +124,8 @@ public:
         std::cout << "\n";
     }
 };
+
+// Initialize static member
+std::map<std::string, Student> Student::students;
 
 #endif // STUDENT_HPP
