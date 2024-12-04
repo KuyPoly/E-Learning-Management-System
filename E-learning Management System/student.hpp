@@ -43,8 +43,25 @@ public:
 
 //Funtions
     // Login function
-    bool login(const std::string& enteredUsername, const std::string& enteredPassword){
-        return this->username == enteredUsername && this->password == enteredPassword;
+    bool login(const string& username, const string& password) {
+        ifstream file("../student.csv"); // Open the file
+        checkfile(file);           // Check if the file opened successfully
+
+        string line, user, pass;
+        int linecount = 0;
+
+        while (getline(file, line)) {
+            linecount++;
+            stringstream ss(line);
+            getline(ss, user, ','); // Read username
+            getline(ss, pass, ','); // Read password
+
+            if (user == username && pass == password) {
+                return true;
+            }
+        }
+
+        return false; // Return false if no match is found
     }
 
     // Change password
