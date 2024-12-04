@@ -1,31 +1,57 @@
-#ifndef STUDENT_HPP
-#define STUDENT_HPP
-
+#ifndef STUDENT
+#define STUDENT
 #include <iostream>
-#include <vector>
-#include <map>
 #include <string>
+#include "../utils/file.h"
+#include "../utils/validate.h"
 
-//class Declaration
-    class Student{
-    private:
-        std::string username;
-        std::string password;
-        std::vector<std::string> enrolledCourses;
-        
-    public:
-        //Constructor
-        Student(std::string user,std::string pass);
+void viewEnrolledCourses(const string &studentName) {
+    ifstream file("../course.csv");
+    if (!file.is_open()) {
+        cout << "Error: Could not open file courses.csv" << endl;
+        return;
+    }
 
-        //Funtion
-        bool login(const std::string&enteredUsername, const std::string& enteredPassword);
-        void changePassword(const std::string& newPassword);
-        void viewAssignments(const std::map<std::string, std::vector<std::string>>& assignments);
-        void viewCourseMaterials(const std::map<std::string, std::vector<std::string>>& courseMaterials);
-        void viewGrades(const std::map<std::string, std::string>&grades);
-        void submitAssignment(const std::string& courseName, const std::string& assignmentName);
-        void viewProgress(const std::map<std::string, int>& progress);
-        void displayInfo();
-        void updateInfor(const std::string& newUsername, const std::string& newPassword);
-    };
+    string line;
+    cout << "Your Enrolled Courses:" << endl;
+    while (getline(file, line)) {
+        vector<string> data = split(line, ',');
+        for (size_t i = 2; i < data.size(); i++) {
+            if (data[i] == studentName) {
+                cout << data[0] << " (Instructor: " << data[1] << ")" << endl;
+            }
+        }
+    }
+    file.close();
+}
+
+void submitAssignment(const string &studentName) {
+    string courseName, assignmentTitle, submission;
+    cout << "Enter course name: ";
+    cin.ignore();
+    getline(cin, courseName);
+
+    if (!isValidCourse(courseName)) {
+        cout << "Error: Course does not exist!" << endl;
+        return;
+    }
+
+    cout << "Enter assignment title: ";
+    getline(cin, assignmentTitle);
+
+    if (!isValidAssignment(courseName, assignmentTitle)) {
+        cout << "Error: Assignment does not exist!" << endl;
+        return;
+    }
+
+    cout << "Enter your submission: ";
+    getline(cin, submission);
+
+    string row = courseName + "," + assignmentTitle + "," + studentName + "," + submission;
+    appendToFile("submissions.csv", row);
+    cout << "Submission recorded successfully!" << endl;
+}
+
+
+
 #endif

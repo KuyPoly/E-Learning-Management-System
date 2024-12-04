@@ -1,80 +1,99 @@
-#include "admin.hpp"
-#include "student.hpp"
-#include "teacher.hpp"
 #include <iostream>
-#include <string>
+#include <fstream>
+#include <vector>
+#include <sstream>
 using namespace std;
 
-// Function to ask for login choice
-int ask_login() {
-    int choice_login;
-    do {
-        cout << "Press 1 for Admin" << endl;
-        cout << "Press 2 for Student" << endl;
-        cout << "Press 3 for Teacher" << endl;
-        cout << "Press 4 to Exit" << endl;
-        cout << "Enter your choice: ";
-        cin >> choice_login;
-    } while (choice_login < 1 || choice_login > 4);
-    return choice_login;
+#include "student.hpp"
+#include "teacher.hpp"
+#include "admin.hpp"
+
+// Main Menu
+void displayMenu(const string &role) {
+    if (role == "Admin") {
+        cout << "1. Add User\n2. Create Course\n3. Enroll Student\n4. View Courses\n5. Exit\n";
+    } else if (role == "Teacher") {
+        cout << "1. Add Assignment\n2. Exit\n";
+    } else if (role == "Student") {
+        cout << "1. View Enrolled Courses\n2. Submit Assignment\n3. Exit\n";
+    }
 }
 
-
-
 int main() {
-    // Welcome message
-    cout << "           ------------------------------------------------" << endl;
-    cout << "           -----------------Welcome to School--------------" << endl;
+    string username, password, role;
+    cout << "Welcome to the E-learning Management System" << endl;
 
-    while (true) { // Main loop
-        int choice_login = ask_login(); // Get the user's choice
-        string username, password;
+    // Role Selection Menu
+    cout << "Select your role:\n1. Admin\n2. Teacher\n3. Student\nEnter choice: ";
+    int roleChoice;
+    cin >> roleChoice;
 
-        switch (choice_login) {
-            case 1: {   
-                Admin admin; // Default constructor
-                bool logged_in = false;
-
-                // Login loop
-                do {
-                    cout << "Enter your username: ";
-                    cin >> username;
-                    cout << "Enter your password: ";
-                    cin >> password;
-
-                    if (admin.login(username, password)) {
-                        cout << "Login successful!" << endl;
-                        logged_in = true;
-                        admin.admin_menu(); // Go to Admin menu
-                        break;
-                    } else {
-                        cout << "Invalid username or password." << endl;
-                        cout << "Press 1 to try again or 2 to go back to the main menu: ";
-                        int login_choice;
-                        cin >> login_choice;
-
-                        if (login_choice == 2) {
-                            cout << "Returning to the main menu..." << endl;
-                            break; // Exit login loop
-                        }
-                    }
-                } while (!logged_in); // Keep looping until login is successful or user chooses to exit
-                break;
-            }
-            case 2:
-                cout << "Student functionality not implemented yet." << endl;
-                break;
-            case 3:
-                cout << "Teacher functionality not implemented yet." << endl;
-                break;
-            case 4:
-                cout << "Exiting the program. Goodbye!" << endl;
-                return 0; // Exit the program
-            default:
-                cout << "Invalid choice. Please try again." << endl;
-                break;
-        }
+    // Map role choice to file and role name
+    string filename;
+    if (roleChoice == 1) {
+        role = "Admin";
+        filename = "../admin.csv";
+    } else if (roleChoice == 2) {
+        role = "Teacher";
+        filename = "../teacher.csv";
+    } else if (roleChoice == 3) {
+        role = "Student";
+        filename = "../student.csv";
+    } else {
+        cout << "Invalid role selection. Exiting!" << endl;
+        return 0;
     }
 
+    // Authentication
+    cout << "Enter username: ";
+    cin >> username;
+    cout << "Enter password: ";
+    cin >> password;
+
+    bool authenticated = false;
+    ifstream file(filename);
+    string line;
+    while (getline(file, line)) {
+        vector<string> data = split(line, ','); // Assuming file format: username,password
+        if (data[0] == username && data[1] == password) {
+            authenticated = true;
+            break;
+        }
+    }
+    file.close();
+
+    if (!authenticated) {
+        cout << "Invalid credentials!" << endl;
+        return 0;
+    }
+
+    cout << "Login successful! Welcome, " << username << " (" << role << ")" << endl;
+
+    // Role-Based Menu and Functionalities
+    int choice;
+    do {
+        displayMenu(role); // Display role-specific menu
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        if (role == "Admin") {
+            if (choice == 1) addUser();
+            else if (choice == 2) createCourse();
+            else if (choice == 3) enrollStudent();
+            else if (choice == 4) viewCourses();
+            else if (choice == 5) break; // Exit
+        } else if (role == "Teacher") {
+            if (choice == 1) addAssignment();
+            else if (choice == 2) break; // Exit
+        } else if (role == "Student") {
+            if (choice == 1) viewEnrolledCourses(username);
+            else if (choice == 2) submitAssignment(username);
+            else if (choice == 3) break; // Exit
+        } else {
+            cout << "Invalid choice. Try again!" << endl;
+        }
+    } while (choice != 5); // Exit condition
+
+    cout << "Goodbye!" << endl;
     return 0;
 }
