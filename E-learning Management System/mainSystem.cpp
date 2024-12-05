@@ -13,7 +13,7 @@ void displayMenu(const string &role) {
     if (role == "Admin") {
         cout << "1. Add User\n2. Create Course\n3. Enroll Student\n4. View Courses\n5. Exit\n";
     } else if (role == "Teacher") {
-        cout << "1. Add Assignment\n2. Exit\n";
+        cout << "1. Add Assignment\n2. Grade Assignment\n3. Display Information\n4. Exit\n";
     } else if (role == "Student") {
         cout << "1. View Enrolled Courses\n2. Submit Assignment\n3. Exit\n";
     }
@@ -83,8 +83,11 @@ int main() {
             else if (choice == 4) viewCourses();
             else if (choice == 5) break; // Exit
         } else if (role == "Teacher") {
-            if (choice == 1) addAssignment();
-            else if (choice == 2) break; // Exit
+            Teacher teacher(username);
+            if (choice == 1) teacher.addAssignment();
+            else if (choice == 2) teacher.gradeAssignment();
+            else if (choice == 3) teacher.displayInfo();
+            else if (choice == 4) break; // Exit
         } else if (role == "Student") {
             if (choice == 1) viewEnrolledCourses(username);
             else if (choice == 2) submitAssignment(username);
