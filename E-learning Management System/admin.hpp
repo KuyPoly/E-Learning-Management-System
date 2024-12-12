@@ -2,6 +2,7 @@
 #define ADMIN_HPP
 #include "../utils/file.h"
 #include "../utils/validate.h"
+#include <fstream>
 
 void addUser() {
     string username, role, password;
@@ -12,27 +13,56 @@ void addUser() {
     cout << "Enter password: ";
     cin >> password;
 
-    string row = username + "," + role + "," + password;
-    appendToFile("../admin.csv", row);
-    cout << "User added successfully!" << endl;
+    string row = username + "," + password ;
+    if (role == "Teacher"){
+        appendToFile("../teacher.csv", row);
+        cout << "User added successfully!" << endl;
+    }else if (role == "Student"){
+        appendToFile("../student.csv", row);
+        cout << "User added successfully!" << endl;
+    }else{
+        cout << "Error: Invalid role!" << endl;
+    }
 }
-
 
 void createCourse() {
     string courseName, instructor;
+
+    // Input course name
     cout << "Enter course name: ";
     cin.ignore();
     getline(cin, courseName);
+
+    if (courseName.empty()) {
+        cout << "Error: Course name cannot be empty!" << endl;
+        return;
+    }
+
+    // Check if course already exists
+    if (isValidCourse(courseName)) {
+        cout << "Error: Course already exists!" << endl;
+        return;
+    }
+
+    // Input instructor username
     cout << "Enter teacher's username: ";
     cin >> instructor;
 
+    // Validate instructor username
     if (!isValidUser(instructor, "Teacher")) {
         cout << "Error: Invalid teacher username!" << endl;
         return;
     }
 
-    string row = courseName + "," + instructor;
-    appendToFile("../course.csv", row);
+    // Append course data to the file
+    ofstream file("../course.csv", ios::app);
+    if (!file) {
+        cout << "Error: Unable to open courses file!" << endl;
+        return;
+    }
+
+    file << courseName << "," << instructor << endl;
+    file.close();
     cout << "Course created successfully!" << endl;
 }
 
