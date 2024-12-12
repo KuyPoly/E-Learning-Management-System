@@ -98,13 +98,15 @@ int main() {
                     if (choice == 1) teacher.addAssignment();
                     else if (choice == 2) break; // Exit
                 } else if (role == "Student") {
-                    if (choice == 1) viewEnrolledCourses(username);
-                    else if (choice == 2) changePassword(username);
-                    else if(choice == 3) viewAssigment();
-                    else if(choice == 4) submitAssignment(username);
-                    else if(choice == 5) viewGrade(username);
-                    else if(choice == 6) viewProgress(username);
-                    else if(choice == 7) displayInformation(username);
+                    // Create an instance of the Student class
+                    Student student(username, password); 
+                    if (choice == 1) student.viewEnrolledCourses();
+                    else if (choice == 2) student.changePassword();
+                    else if(choice == 3) student.viewAssignments();
+                    else if(choice == 4) student.submitAssignment();
+                    else if(choice == 5) student.viewGrade();
+                    else if(choice == 6) student.viewProgress();
+                    else if(choice == 7) student.displayInformation();
                     else if (choice == 8) break; // Exit
                 } else {
                     cout << "Invalid choice. Try again!" << endl;
