@@ -198,7 +198,199 @@ public:
 
         submissionsFile.close();
     }
+        void viewGrade() const {
+        ifstream gradesFile("../grades.csv");
+        if (!gradesFile.is_open()) {
+            cout << "Error: Could not open grades.csv file!" << endl;
+            return;
+        }
 
+        string line;
+        vector<vector<string>> userGrades;
+
+        while (getline(gradesFile, line)) {
+            vector<string> data = split(line, ',');
+            if (data.size() >= 4 && data[2] == username) {
+                userGrades.push_back(data);
+            }
+        }
+        gradesFile.close();
+
+        if (userGrades.empty()) {
+            cout << "No grades found for username: " << username << endl;
+            return;
+        }
+
+        cout << "Grades for " << username << ":" << endl;
+        cout << "------------------------------------------------------" << endl;
+        cout << "Course       | Assignment      | Name    | Grade" << endl;
+        cout << "------------------------------------------------------" << endl;
+        // Loop through all the grades for the student
+        for(const auto& grade : userGrades){
+            cout<<grade[0] <<" | " <<grade[1] <<" | ";
+
+            // Split grades and display them
+            for (size_t i = 3; i < grade.size(); ++i) {
+            cout << grade[i];
+            if (i != grade.size() - 1) {
+                cout << ", ";  // Separate grades by commas
+            }
+            }
+        cout << endl;
+        }
+        cout << "------------------------------------------------------" << endl;
+    }
+        void viewProgress() const {
+        ifstream gradesFile("../grades.csv");
+        if (!gradesFile.is_open()) {
+            cout << "Error: Could not open grades.csv file!" << endl;
+            return;
+        }
+
+        string line;
+        vector<string> subjects;
+        vector<vector<int>> gradesList;  // Stores grades for each subject
+
+        // Read grades from grades.csv
+        while (getline(gradesFile, line)) {
+            vector<string> data = split(line, ',');
+            if (data.size() >= 4 && data[2] == username) {  // Check if the current student
+                string subject = data[0];  // Get the course name (subject)
+                bool subjectFound = false;
+
+                // Check if the subject already exists in subjects
+                for (size_t i = 0; i < subjects.size(); ++i) {
+                    if (subjects[i] == subject) {
+                        subjectFound = true;
+                        gradesList[i].push_back(stoi(data[3]));  // Add grade for the subject
+                        break;
+                    }
+                }
+
+                // If subject is not found, add a new subject and grades
+                if (!subjectFound) {
+                    subjects.push_back(subject);
+                    vector<int> newGrades = { stoi(data[3]) };
+                    gradesList.push_back(newGrades);
+                }
+            }
+        }
+        gradesFile.close();
+
+        if (subjects.empty()) {
+            cout << "No grades found for username: " << username << endl;
+            return;
+        }
+
+        // Write the progress to progress.csv
+        ofstream progressFile("../progress.csv", ios::app);  // Open in append mode to add new records
+        if (!progressFile.is_open()) {
+            cout << "Error: Could not open progress.csv file!" << endl;
+            return;
+        }
+
+        cout << "Progress for " << username << ":" << endl;
+        cout << "---------------------------------------------------------------" << endl;
+        cout << "Subject  | Scores  | Average" << endl;
+        cout << "---------------------------------------------------------------" << endl;
+
+        // Loop through each subject and its corresponding grades
+        for (size_t i = 0; i < subjects.size(); ++i) {
+            string subject = subjects[i];
+            vector<int> grades = gradesList[i];
+
+            // Calculate the average grade
+            double average = 0;
+            if (!grades.empty()) {
+                double sum = 0;
+                for (int grade : grades) {
+                    sum += grade;
+                }
+                average = sum / grades.size();  // Compute the average
+            }
+
+            // Write the progress to progress.csv
+            progressFile << subject << "," << username << ",";
+            for (size_t j = 0; j < grades.size(); ++j) {
+                progressFile << grades[j];
+                if (j != grades.size() - 1) {
+                    progressFile << ",";  // Separate grades with a comma
+                }
+            }
+            progressFile << "," << average << endl;  // Write the average at the end of the record
+
+            // Display the progress (subject, scores, and average)
+            cout << subject << " | ";
+            for (size_t j = 0; j < grades.size(); ++j) {
+                cout << grades[j];
+                if (j != grades.size() - 1) {
+                    cout << ", ";  // Separate grades with a comma
+                }
+            }
+            cout << " | " << average << endl;
+            cout << "---------------------------------------------------------------" << endl;
+        }
+
+        progressFile.close();
+    }
+        void displayInformation() const {
+        ifstream studentsFile("../student.csv");
+        if (!studentsFile.is_open()) {
+            cout << "Error: Could not open students.csv file!" << endl;
+            return;
+        }
+
+        string line;
+        string password;
+        bool found = false;
+
+        while (getline(studentsFile, line)) {
+            vector<string> data = split(line, ',');
+            if (data.size() >= 2 && data[0] == username) {
+                password = data[1];
+                found = true;
+                break;
+            }
+        }
+
+        studentsFile.close();
+
+        if (!found) {
+            cout << "No information found for username: " << username << endl;
+            return;
+        }
+
+        ifstream coursesFile("../course.csv");
+        if (!coursesFile.is_open()) {
+            cout << "Error: Could not open course.csv file!" << endl;
+            return;
+        }
+
+        vector<string> enrolledCourses;
+        while (getline(coursesFile, line)) {
+            vector<string> data = split(line, ',');
+            if (data.size() > 2 && data[2] == username) {
+                enrolledCourses.push_back(data[0]);
+            }
+        }
+
+        coursesFile.close();
+
+        cout << "Student Information for " << username << ":" << endl;
+        cout << "---------------------------------------------------" << endl;
+        cout << "Username: " << username << endl;
+        cout << "Password: " << password << endl;
+        cout << "Enrolled Courses: ";
+        if (enrolledCourses.empty()) {
+            cout << "None" << endl;
+        } else {
+            for (const auto& course : enrolledCourses) {
+                cout << course << " ";
+            }
+            cout << endl;
+        }
+        cout << "---------------------------------------------------" << endl;
+    }
     
 };
 
