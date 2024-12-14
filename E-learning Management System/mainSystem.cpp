@@ -95,6 +95,7 @@ int main() {
                     else if (choice == 4) viewCourses();
                     else if (choice == 5) break; // Exit
                 } else if (role == "Teacher") {
+                    Teacher teacher(username);  
                     if (choice == 1) teacher.addAssignment();
                     else if (choice == 2) break; // Exit
                 } else if (role == "Student") {
