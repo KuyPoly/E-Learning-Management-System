@@ -13,7 +13,7 @@ void addUser() {
     cout << "Enter password: ";
     cin >> password;
 
-    string row = username + "," + password ;
+    string row = username + "," + password + "\n" ;
     if (role == "Teacher"){
         appendToFile("../teacher.csv", row);
         cout << "User added successfully!" << endl;

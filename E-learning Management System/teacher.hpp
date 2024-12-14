@@ -25,138 +25,196 @@ vector<string> splitLine(const string &line, char delimiter) {
 // Teacher class definition
 class Teacher {
 private:
-    string name;
+    string username;
+    string password;
 
 public:
-    // Constructor
-    Teacher(const string &teacherName) : name(teacherName) {}
-
-    // Function to add an assignment
-    void addAssignment() {
-        string courseName, assignmentTitle;
-        cout << "Enter course name: ";
-        cin.ignore();
-        getline(cin, courseName);
-
-        if (!isValidCourse(courseName)) {
-            cout << "Error: Course does not exist!" << endl;
-            return;
-        }
-
-        cout << "Enter assignment title: ";
-        getline(cin, assignmentTitle);
-
-        string row = courseName + "," + assignmentTitle;
-        appendToFile("../assignments.csv", row);
-        cout << "Assignment added successfully!" << endl;
+    Teacher(string username, string password) {
+        this->username = username;
+        this->password = password;
     }
 
-    // Function to grade an assignment
-    void gradeAssignment() {
-        // Read assignments
-        ifstream file("../assignments.csv");
-        if (!file.is_open()) {
-            cout << "Error: Unable to open assignments file!" << endl;
-            return;
+
+void addAssignment() {
+    // First, get the courses this teacher teaches
+    vector<string> teacherCourses;
+    ifstream courseFile("../course.csv");
+    string line;
+    while (getline(courseFile, line)) {
+        vector<string> courseDetails = split(line, ',');
+        if (courseDetails.size() >= 2 && courseDetails[1] == username) {
+            teacherCourses.push_back(courseDetails[0]);
         }
+    }
+    courseFile.close();
 
-        vector<string> assignments;
-        string line;
-        while (getline(file, line)) {
-            assignments.push_back(line);
-        }
-        file.close();
-
-        // Check if there are any assignments
-        if (assignments.empty()) {
-            cout << "No assignments available to grade." << endl;
-            return;
-        }
-
-        // Display assignments
-        cout << "Available assignments:" << endl;
-        for (size_t i = 0; i < assignments.size(); ++i) {
-            vector<string> details = splitLine(assignments[i], ',');
-            cout << i + 1 << ". Course: " << details[0] << ", Title: " << details[1] << endl;
-        }
-
-        // Select assignment
-        int choice;
-        cout << "Select an assignment to grade (Enter number): ";
-        cin >> choice;
-
-        if (choice < 1 || choice > assignments.size()) {
-            cout << "Invalid choice!" << endl;
-            return;
-        }
-
-        string selectedAssignment = assignments[choice - 1];
-        vector<string> assignmentDetails = splitLine(selectedAssignment, ',');
-
-        string courseName = assignmentDetails[0];
-        string assignmentTitle = assignmentDetails[1];
-
-        // Enter student name and grade
-        string studentName;
-        int grade;
-        cout << "Enter student name: ";
-        cin.ignore();
-        getline(cin, studentName);
-
-        cout << "Enter grade (0-100): ";
-        cin >> grade;
-
-        if (grade < 0 || grade > 100) {
-            cout << "Invalid grade. Must be between 0 and 100!" << endl;
-            return;
-        }
-
-        // Append grade to file
-        string gradeRecord = courseName + "," + assignmentTitle + "," + studentName + "," + to_string(grade);
-        appendToFile("../grades.csv", gradeRecord);
-        cout << "Grade recorded successfully!" << endl;
+    if (teacherCourses.empty()) {
+        cout << "You are not assigned to any courses!" << endl;
+        return;
     }
 
-    // Function to display student and course information
-    void displayInfo() {
-        // Read student information
-        ifstream studentFile("../student.csv");
-        if (!studentFile.is_open()) {
-            cout << "Error: Unable to open student file!" << endl;
-            return;
-        }
+    // Display teacher's courses
+    cout << "\nYour courses:" << endl;
+    for (size_t i = 0; i < teacherCourses.size(); ++i) {
+        cout << i + 1 << ". " << teacherCourses[i] << endl;
+    }
 
-        cout << "\nStudent Information:" << endl;
-        cout << "---------------------" << endl;
-        string line;
-        while (getline(studentFile, line)) {
-            vector<string> studentDetails = splitLine(line, ',');
-            cout << "Username: " << studentDetails[0] << ", Password: " << studentDetails[1] << endl;
-        }
-        studentFile.close();
-        
-        // Read course information
-        ifstream courseFile("../course.csv");
-        if (!courseFile.is_open()) {
-            cout << "Error: Unable to open course file!" << endl;
-            return;
-        }
+    int courseChoice;
+    cout << "Select a course (Enter number): ";
+    cin >> courseChoice;
 
-        cout << "\nCourse Information:" << endl;
-        cout << "--------------------" << endl;
-        while (getline(courseFile, line)) {
-            vector<string> courseDetails = splitLine(line, ',');
-            cout << "Course: " << courseDetails[0] << ", Enrolled Students: ";
-            for (size_t i = 1; i < courseDetails.size(); ++i) {
-                cout << courseDetails[i];
-                if (i != courseDetails.size() - 1) {
-                    cout << ", ";
-                }
+    if (courseChoice < 1 || courseChoice > static_cast<int>(teacherCourses.size())) {
+        cout << "Invalid course selection!" << endl;
+        return;
+    }
+
+    string courseName = teacherCourses[courseChoice - 1];
+    string assignmentTitle;
+    cout << "Enter assignment title: ";
+    cin.ignore();
+    getline(cin, assignmentTitle);
+
+    ofstream file("../assignments.csv", ios::app);
+    file << courseName << "," << assignmentTitle << endl;
+    file.close();
+
+    cout << "Assignment added successfully!" << endl;
+}
+
+void gradeAssignment() {
+    // First, get the courses this teacher teaches
+    vector<string> teacherCourses;
+    ifstream courseFile("../course.csv");
+    string line;
+    while (getline(courseFile, line)) {
+        vector<string> courseDetails = split(line, ',');
+        if (courseDetails.size() >= 2 && courseDetails[1] == username) {
+            teacherCourses.push_back(courseDetails[0]);
+        }
+    }
+    courseFile.close();
+
+    if (teacherCourses.empty()) {
+        cout << "You are not assigned to any courses!" << endl;
+        return;
+    }
+    // Read assignments for teacher's courses only
+    ifstream assignFile("../assignments.csv");
+    if (!assignFile.is_open()) {
+        cout << "Error: Unable to open assignments file!" << endl;
+        return;
+    }
+
+    vector<string> validAssignments;
+    while (getline(assignFile, line)) {
+        vector<string> details = split(line, ',');
+        if (find(teacherCourses.begin(), teacherCourses.end(), details[0]) != teacherCourses.end()) {
+            validAssignments.push_back(line);
+        }
+    }
+    assignFile.close();
+
+    if (validAssignments.empty()) {
+        cout << "No assignments available to grade in your courses." << endl;
+        return;
+    }
+
+    cout << "Available assignments in your courses:" << endl;
+    for (size_t i = 0; i < validAssignments.size(); ++i) {
+        vector<string> details = split(validAssignments[i], ',');
+        cout << i + 1 << ". Course: " << details[0] << ", Title: " << details[1] << endl;
+    }
+
+    int choice;
+    cout << "Select an assignment to grade (Enter number): ";
+    cin >> choice;
+
+    if (choice < 1 || choice > static_cast<int>(validAssignments.size())) {
+        cout << "Invalid choice!" << endl;
+        return;
+    }
+
+    vector<string> assignmentDetails = split(validAssignments[choice - 1], ',');
+    string courseName = assignmentDetails[0];
+    string assignmentTitle = assignmentDetails[1];
+
+    // Get list of students enrolled in this course
+    vector<string> enrolledStudents;
+    courseFile.open("../course.csv");
+    while (getline(courseFile, line)) {
+        vector<string> courseDetails = split(line, ',');
+        if (courseDetails[0] == courseName) {
+            for (size_t i = 2; i < courseDetails.size(); i++) {
+                enrolledStudents.push_back(courseDetails[i]);
             }
-            cout << endl;
+            break;
         }
-        courseFile.close();
     }
+    courseFile.close();
+
+    cout << "\nEnrolled students in " << courseName << ":" << endl;
+    for (const auto& student : enrolledStudents) {
+        cout << "- " << student << endl;
+    }
+
+    string studentName;
+    cout << "\nEnter student name: ";
+    cin.ignore();
+    getline(cin, studentName);
+
+    if (find(enrolledStudents.begin(), enrolledStudents.end(), studentName) == enrolledStudents.end()) {
+        cout << "Error: Student is not enrolled in this course!" << endl;
+        return;
+    }
+
+    int grade;
+    cout << "Enter grade (0-100): ";
+    cin >> grade;
+
+    if (grade < 0 || grade > 100) {
+        cout << "Invalid grade. Must be between 0 and 100!" << endl;
+        return;
+    }
+
+    ofstream gradeFile("../grades.csv", ios::app);
+    gradeFile << courseName << "," << assignmentTitle << "," << studentName << "," << grade << endl;
+    gradeFile.close();
+
+    cout << "Grade recorded successfully!" << endl;
+}
+void displayInfo() {
+    ifstream courseFile("../course.csv");
+    if (!courseFile.is_open()) {
+        cout << "Error: Unable to open course file!" << endl;
+        return;
+    }
+
+    cout << "\nCourse Information:" << endl;
+    cout << "--------------------" << endl;
+    string line;
+    bool foundCourse = false;
+    
+    while (getline(courseFile, line)) {
+        vector<string> courseDetails = split(line, ',');
+        if(courseDetails.size() >= 2 && courseDetails[1] == username) {
+            foundCourse = true;
+            cout << "Course: " << courseDetails[0] << endl;
+            cout << "Teacher: " << courseDetails[1] << endl;
+            cout << "Enrolled Students: ";
+            // Start from index 2 to skip course name and teacher name
+            for (size_t i = 2; i < courseDetails.size(); ++i) {
+                cout << courseDetails[i];
+                if (i != courseDetails.size() - 1) cout << ", ";
+            }
+            cout << endl << "--------------------" << endl;
+        }
+    }
+    courseFile.close();
+
+    if (!foundCourse) {
+        cout << "You are not teaching any courses." << endl;
+    }
+}
 };
 
 #endif
