@@ -159,4 +159,100 @@ public:
     }
 };
 
+// Lesson class
+class Lesson {
+public:
+    string title;
+    string content;
+    vector<string> filePaths;
+    vector<string> links;
+    string details;
+
+    Lesson(const string& title, const string& content)
+        : title(title), content(content) {}
+
+    void addFile(const string& filePath) {
+        filePaths.push_back(filePath);
+        cout << "File added successfully: " << filePath << "\n";
+    }
+
+    void addLink(const string& link) {
+        links.push_back(link);
+        cout << "Link added successfully: " << link << "\n";
+    }
+
+    void addDetails(const string& lessonDetails) {
+        details = lessonDetails;
+        cout << "Details added successfully!\n";
+    }
+
+    void display() const {
+        cout << "\nTitle: " << title << "\nContent: " << content << "\n";
+
+        if (!filePaths.empty()) {
+            cout << "Attached Files:\n";
+            for (const auto& file : filePaths) {
+                cout << "- " << file << "\n";
+            }
+        } else {
+            cout << "No files attached.\n";
+        }
+
+        if (!links.empty()) {
+            cout << "Links:\n";
+            for (const auto& link : links) {
+                cout << "- " << link << "\n";
+            }
+        } else {
+            cout << "No links provided.\n";
+        }
+
+        if (!details.empty()) {
+            cout << "Details: " << details << "\n";
+        } else {
+            cout << "No additional details provided.\n";
+        }
+    }
+};
+
+// LessonManager class
+class LessonManager {
+private:
+    vector<Lesson> lessons;
+
+public:
+    void addLesson(const Lesson& lesson) {
+        lessons.push_back(lesson);
+        cout << "Lesson added successfully: " << lesson.title << "\n";
+    }
+
+    void deleteLesson(const string& lessonTitle) {
+        auto it = remove_if(lessons.begin(), lessons.end(),
+                            [&lessonTitle](const Lesson& lesson) {
+                                return lesson.title == lessonTitle;
+                            });
+        if (it != lessons.end()) {
+            lessons.erase(it, lessons.end());
+            cout << "Lesson deleted successfully: " << lessonTitle << "\n";
+        } else {
+            cout << "Lesson not found: " << lessonTitle << "\n";
+        }
+    }
+
+    void displayAllLessons() const {
+        if (lessons.empty()) {
+            cout << "No lessons available.\n";
+        } else {
+            cout << "Available Lessons:\n";
+            for (const auto& lesson : lessons) {
+                lesson.display();
+            }
+        }
+    }
+
+    const vector<Lesson>& getLessons() const {
+        return lessons;
+    }
+};
+
 #endif
