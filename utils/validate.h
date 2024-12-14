@@ -6,21 +6,33 @@ using namespace std;
 
 // Validate if a user exists with the correct role
 bool isValidUser(const string &username, const string &role) {
-    ifstream file("users.csv");
+    string roleFile;
+
+    if (role == "Teacher") {
+        roleFile = "../teacher.csv"; // File dedicated to teachers
+    } else if (role == "Student") {
+        roleFile = "../student.csv"; // File for students
+    } else {
+        cout << "Error: Unsupported role!" << endl;
+        return false;
+    }
+
+    ifstream file(roleFile);
     string line;
     while (getline(file, line)) {
         vector<string> data = split(line, ',');
-        if (data[0] == username && data[1] == role) {
-            return true;
+        if (data[0] == username) {
+            return true; // User exists with the correct role
         }
     }
     file.close();
     return false;
 }
 
+
 // Validate if a course exists
 bool isValidCourse(const string &courseName) {
-    ifstream file("courses.csv");
+    ifstream file("../course.csv");
     string line;
     while (getline(file, line)) {
         vector<string> data = split(line, ',');
