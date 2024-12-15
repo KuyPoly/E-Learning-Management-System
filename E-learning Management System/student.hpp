@@ -21,21 +21,22 @@ public:
         }
 
         string line;
-        bool foundCourse = false; // To check if any courses are found
+        bool foundCourse = false; // To track if any courses are found
+
         cout << "Your Enrolled Courses:" << endl;
 
-        // Print the header once
         cout << "--------------------------------------------" << endl;
         cout << "Course ID | Instructor Name" << endl;
         cout << "--------------------------------------------" << endl;
 
         while (getline(file, line)) {
             vector<string> data = split(line, ',');
-            for (size_t i = 2; i < data.size(); i++) {
+            for (size_t i = 2; i < data.size(); i++) { // Check names starting from data[2]
                 if (data[i] == username) {
-                    // Print course details
+                    // Print course details only if the username matches
                     cout << data[0] << "  |  " << data[1] << endl;
                     foundCourse = true;
+                    break; // No need to check further names in this row
                 }
             }
         }
@@ -47,6 +48,7 @@ public:
         cout << "--------------------------------------------" << endl;
         file.close();
     }
+
 
     void changePassword() {
         string old_password, new_password, confirm_password;
