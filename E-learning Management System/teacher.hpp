@@ -215,6 +215,48 @@ void displayInfo() {
         cout << "You are not teaching any courses." << endl;
     }
 }
+
+    void viewAssignmentLessons() {
+    // Get the courses this teacher teaches
+    vector<string> teacherCourses;
+    ifstream courseFile("../course.csv");
+    string line;
+    while (getline(courseFile, line)) {
+        vector<string> courseDetails = split(line, ',');
+        if (courseDetails.size() >= 2 && courseDetails[1] == username) {
+            teacherCourses.push_back(courseDetails[0]);
+            }
+        }
+        courseFile.close();
+
+        if (teacherCourses.empty()) {
+            cout << "You are not assigned to any courses!" << endl;
+            return;
+        }
+
+        // Read assignments and lessons for the teacher's courses
+        ifstream assignmentFile("../assignments.csv");
+        ifstream lessonFile("../lessons.csv");
+        if (!assignmentFile.is_open() || !lessonFile.is_open()) {
+            cout << "Error: Unable to open assignments or lessons file!" << endl;
+            return;
+        }
+
+        vector<string> assignments;
+        while (getline(assignmentFile, line)) {
+            vector<string> details = split(line, ',');
+            if (find(teacherCourses.begin(), teacherCourses.end(), details[0]) != teacherCourses.end()) {
+                assignments.push_back(line);
+            }
+        }
+        assignmentFile.close();
+
+        if (assignments.empty()) {
+            cout << "No assignments available for your courses." << endl;
+            return;
+        }
+
+    }
 };
 
 // Lesson class
