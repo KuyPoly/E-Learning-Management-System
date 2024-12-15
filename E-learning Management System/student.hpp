@@ -21,20 +21,30 @@ public:
         }
 
         string line;
+        bool foundCourse = false; // To check if any courses are found
         cout << "Your Enrolled Courses:" << endl;
+
+        // Print the header once
+        cout << "--------------------------------------------" << endl;
+        cout << "Course ID | Instructor Name" << endl;
+        cout << "--------------------------------------------" << endl;
+
         while (getline(file, line)) {
             vector<string> data = split(line, ',');
             for (size_t i = 2; i < data.size(); i++) {
                 if (data[i] == username) {
-                    cout << "Courses List:" << endl;
-                    cout << "--------------------------------------------" << endl;
-                    cout << "Course ID | Instructor Name" << endl;
-                    cout << "--------------------------------------------" << endl;
+                    // Print course details
                     cout << data[0] << "  |  " << data[1] << endl;
-                    cout << "--------------------------------------------" << endl;
+                    foundCourse = true;
                 }
             }
         }
+
+        if (!foundCourse) {
+            cout << "You are not enrolled in any courses." << endl;
+        }
+
+        cout << "--------------------------------------------" << endl;
         file.close();
     }
 
