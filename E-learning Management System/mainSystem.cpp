@@ -14,10 +14,12 @@ void displayMenu(const string &role) {
         cout << "1. Add User\n2. Create Course\n3. Enroll Student\n4. View Courses\n5. Exit\n";
     } else if (role == "Teacher") {
         cout << "\n=== Teacher Menu ===\n";
-        cout << "1. Add Assignment\n";
-        cout << "2. Grade Assignment\n";
-        cout << "3. Display Student & Course Info\n";
-        cout << "4. Exit\n";
+        cout << "1. Manage Lessons\n";
+        cout << "2. Add Assignment\n";
+        cout << "3. Grade Assignment\n";
+        cout << "4. View Student Progress\n";
+        cout << "5. Display Student & Course Info\n";
+        cout << "6. Exit\n";
         cout << "==================\n";
         cout << "Enter your choice: ";
     } else if (role == "Student") {
@@ -52,17 +54,16 @@ int main() {
 
     // Authentication
     bool authenticated = false;
-    do{
+    do {
         cout << "Enter username: ";
         cin >> username;
         cout << "Enter password: ";
         cin >> password;
 
-        bool authenticated = false;
         ifstream file(filename);
         string line;
         while (getline(file, line)) {
-            vector<string> data = split(line, ','); // Assuming file format: username,password
+            vector<string> data = split(line, ',');
             if (data[0] == username && data[1] == password) {
                 authenticated = true;
                 break;
@@ -72,59 +73,55 @@ int main() {
 
         if (!authenticated) {
             cout << "Invalid credentials!" << endl;
-            cout<< "Press 1 to try again or 2 to exit!";
+            cout << "Press 1 to try again or 2 to exit: ";
             int choice;
-            cin>>choice;
-            if(choice==2){
-                cout<<"Exiting..."<<endl;
-                break;//exit the loop directly
+            cin >> choice;
+            if (choice == 2) {
+                cout << "Exiting..." << endl;
+                return 0;
             }
-        }else{
-             cout << "Login successful! Welcome, " << username << " (" << role << ")" << endl;
-                 // Role-Based Menu and Functionalities
-
-            int exitOption = 0; // Define an exit option based on role
-            if (role == "Admin") exitOption = 5;
-            else if (role == "Teacher") exitOption = 2;
-            else if (role == "Student") exitOption = 8;
-
-            int choice;
-            do {
-                displayMenu(role); // Display role-specific menu
-                cout << "Enter your choice: ";
-                cin >> choice;
-
-                if (role == "Admin") {
-                    if (choice == 1) addUser();
-                    else if (choice == 2) createCourse();
-                    else if (choice == 3) enrollStudent();
-                    else if (choice == 4) viewCourses();
-                    else if (choice == 5) break; // Exit
-                } else if (role == "Teacher") {
-                    Teacher teacher(username, password);
-                    if (choice == 1) teacher.addAssignment();
-                    else if (choice == 2) teacher.gradeAssignment();
-                    else if (choice == 3) teacher.displayInfo();
-                    else if (choice == 4) break; 
-                } else if (role == "Student") {
-                    // Create an instance of the Student class
-                    Student student(username, password); 
-                    if (choice == 1) student.viewEnrolledCourses();
-                    else if (choice == 2) student.changePassword();
-                    else if(choice == 3) student.viewAssignments();
-                    else if(choice == 4) student.submitAssignment();
-                    else if(choice == 5) student.viewGrade();
-                    else if(choice == 6) student.viewProgress();
-                    else if(choice == 7) student.displayInformation();
-                    else if (choice == 8) break; // Exit
-                } else {
-                    cout << "Invalid choice. Try again!" << endl;
-                }
-            } while (choice != exitOption); // Exit condition
-
-        cout << "Goodbye!" << endl;
-            return 0;
         }
-    }while(!authenticated);
+    } while (!authenticated);
 
+    cout << "Login successful! Welcome, " << username << " (" << role << ")" << endl;
+
+    // Role-Based Menu and Functionalities
+    int exitOption = (role == "Admin") ? 5 : (role == "Teacher" ? 6 : 8);
+    int choice;
+
+    do {
+        displayMenu(role);
+        cin >> choice;
+
+        if (role == "Admin") {
+            if (choice == 1) addUser();
+            else if (choice == 2) createCourse();
+            else if (choice == 3) enrollStudent();
+            else if (choice == 4) viewCourses();
+            else if (choice == 5) break;
+        } 
+        else if (role == "Teacher") {
+            Teacher teacher(username, password);
+            if (choice == 1) teacher.manageLessons();
+            else if (choice == 2) teacher.addAssignment();
+            else if (choice == 3) teacher.gradeAssignment();
+            else if (choice == 4) teacher.viewProgress();
+            else if (choice == 5) teacher.displayInfo();
+            else if (choice == 6) break;
+        } 
+        else if (role == "Student") {
+            Student student(username, password);
+            if (choice == 1) student.viewEnrolledCourses();
+            else if (choice == 2) student.changePassword();
+            else if (choice == 3) student.viewAssignments();
+            else if (choice == 4) student.submitAssignment();
+            else if (choice == 5) student.viewGrade();
+            else if (choice == 6) student.viewProgress();
+            else if (choice == 7) student.displayInformation();
+            else if (choice == 8) break;
+        }
+    } while (choice != exitOption);
+
+    cout << "Goodbye!" << endl;
+    return 0;
 }
