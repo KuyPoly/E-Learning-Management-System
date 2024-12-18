@@ -1,134 +1,386 @@
 #ifndef ADMIN_HPP
 #define ADMIN_HPP
+
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <sstream>
 #include "../utils/file.h"
 #include "../utils/validate.h"
-#include <fstream>
+using namespace std;
 
-void addUser() {
-    string username, role, password;
-    cout << "Enter username: ";
-    cin >> username;
-    cout << "Enter role (Teacher or Student): ";
-    cin >> role;
-    cout << "Enter password: ";
-    cin >> password;
+class Admin {
+public:
+    // Add a new user to the system
+    void addUser() {
+        string fullName, role, password;
+        while (true) {
+            cout << "Enter full name (First and Last): ";
+            cin.ignore();
+            getline(cin, fullName);
 
-    string row = username + "," + password + "\n" ;
-    if (role == "Teacher"){
-        appendToFile("../teacher.csv", row);
-        cout << "User added successfully!" << endl;
-    }else if (role == "Student"){
-        appendToFile("../student.csv", row);
-        cout << "User added successfully!" << endl;
-    }else{
-        cout << "Error: Invalid role!" << endl;
-    }
-}
+            cout << "Enter role (Admin, Teacher, or Student): ";
+            getline(cin, role);
 
-void createCourse() {
-    string courseName, instructor;
+            cout << "Enter password: ";
+            getline(cin, password);
 
-    // Input course name
-    cout << "Enter course name: ";
-    cin.ignore();
-    getline(cin, courseName);
+            // Determine file path based on role
+            string filePath;
+            if (role == "Admin") filePath = "../admin.csv";
+            else if (role == "Teacher") filePath = "../teacher.csv";
+            else if (role == "Student") filePath = "../student.csv";
+            else {
+                cout << "Error: Invalid role! Please enter 'Admin', 'Teacher', or 'Student'." << endl;
+                if (exitPrompt()) return;
+                continue;
+            }
 
-    if (courseName.empty()) {
-        cout << "Error: Course name cannot be empty!" << endl;
-        return;
-    }
-
-    // Check if course already exists
-    if (isValidCourse(courseName)) {
-        cout << "Error: Course already exists!" << endl;
-        return;
+            // Append the new user to the file
+            string row = fullName + "," + password;
+            appendToFile(filePath, row);
+            cout << role << " user added successfully!" << endl;
+            break;
+        }
     }
 
-    // Input instructor username
-    cout << "Enter teacher's username: ";
-    cin >> instructor;
+    // Create a new course
+    void createCourse() {
+        string courseName, instructor;
+        while (true) {
+            cout << "Enter course name: ";
+            cin.ignore();
+            getline(cin, courseName);
 
-    // Validate instructor username
-    if (!isValidUser(instructor, "Teacher")) {
-        cout << "Error: Invalid teacher username!" << endl;
-        return;
+            if (courseName.empty()) {
+                cout << "Error: Course name cannot be empty!" << endl;
+                if (exitPrompt()) return;
+                continue;
+            }
+
+            if (isValidCourse(courseName)) {
+                cout << "Error: Course already exists!" << endl;
+                if (exitPrompt()) return;
+                continue;
+            }
+
+            cout << "Enter teacher's full name: ";
+            getline(cin, instructor);
+
+            if (!isValidUser(instructor, "Teacher")) {
+                cout << "Error: Invalid teacher username!" << endl;
+                if (exitPrompt()) return;
+                continue;
+            }
+
+            ofstream file("../course.csv", ios::app);
+            if (!file) {
+                cout << "Error: Unable to open courses file!" << endl;
+                if (exitPrompt()) return;
+                continue;
+            }
+
+            file << courseName << "," << instructor << endl;
+            file.close();
+            cout << "Course created successfully!" << endl;
+            break;
+        }
     }
 
-    // Append course data to the file
-    ofstream file("../course.csv", ios::app);
-    if (!file) {
-        cout << "Error: Unable to open courses file!" << endl;
-        return;
+ // Enroll a student in a course
+    void enrollStudent() {
+        string courseName, studentName;
+        while (true) {
+            cout << "Enter course name: ";
+            cin.ignore();
+            getline(cin, courseName);
+
+            cout << "Enter student's full name: ";
+            getline(cin, studentName);
+
+            if (!isValidCourse(courseName)) {
+                cout << "Error: Course does not exist!" << endl;
+                if (exitPrompt()) return;
+                continue;
+            }
+
+            if (!isValidUser(studentName, "Student")) {
+                cout << "Error: Invalid student username!" << endl;
+                if (exitPrompt()) return;
+                continue;
+            }
+
+            ifstream file("../course.csv");
+            ofstream tempFile("temp.csv");
+            string line;
+            bool found = false;
+
+            while (getline(file, line)) {
+                vector<string> data = split(line, ',');
+                if (data[0] == courseName) {
+                    found = true;
+                    tempFile << line << "," << studentName << endl;
+                } else {
+                    tempFile << line << endl;
+                }
+            }
+
+            file.close();
+            tempFile.close();
+
+            if (found) {
+                remove("../course.csv");
+                rename("temp.csv", "../course.csv");
+                cout << "Student enrolled successfully!" << endl;
+            } else {
+                remove("temp.csv");
+                cout << "Error: Course not found!" << endl;
+            }
+            break;
+        }
     }
 
-    file << courseName << "," << instructor << endl;
-    file.close();
-    cout << "Course created successfully!" << endl;
-}
 
-void enrollStudent() {
-    string courseName, studentName;
-    cout << "Enter course name: ";
-    cin.ignore();
-    getline(cin, courseName);
-    cout << "Enter student's username: ";
-    cin >> studentName;
 
-    if (!isValidCourse(courseName)) {
-        cout << "Error: Course does not exist!" << endl;
-        return;
+    // Delete a course
+    void deleteCourse() {
+        string courseName;
+        while (true) {
+            cout << "Enter course name to delete: ";
+            cin.ignore();
+            getline(cin, courseName);
+
+            if (courseName.empty()) {
+                cout << "Error: Course name cannot be empty! Please try again." << endl;
+                continue;
+            }
+
+            ifstream courseFile("../course.csv");
+            ofstream tempFile("temp.csv");
+            string line;
+            bool courseFound = false;
+
+            while (getline(courseFile, line)) {
+                vector<string> data = split(line, ',');
+                if (data[0] == courseName) {
+                    courseFound = true; // Mark the course for deletion
+                } else {
+                    tempFile << line << endl; // Retain other courses
+                }
+            }
+
+            courseFile.close();
+            tempFile.close();
+
+            if (courseFound) {
+                remove("../course.csv");
+                rename("temp.csv", "../course.csv");
+                cout << "Course deleted successfully!" << endl;
+
+                // Delete related data from assignments, grades, and submissions
+                deleteRelatedFiles(courseName, "../assignments.csv");
+                deleteRelatedFiles(courseName, "../grades.csv");
+                deleteRelatedFiles(courseName, "../submissions.csv");
+            } else {
+                remove("temp.csv");
+                cout << "Error: Course not found!" << endl;
+            }
+            return;
+        }
+
     }
-    if (!isValidUser(studentName, "Student")) {
-        cout << "Error: Invalid student username!" << endl;
-        return;
+
+    // Drop a student from a course
+    void dropStudentFromCourse() {
+        string courseName, studentName;
+        while (true) {
+            cout << "Enter course name: ";
+            cin.ignore();
+            getline(cin, courseName);
+
+            cout << "Enter student's full name to drop: ";
+            getline(cin, studentName);
+
+            if (!isValidCourse(courseName)) {
+                cout << "Error: Course does not exist!" << endl;
+                if (exitPrompt()) return;
+                continue;
+            }
+
+            ifstream file("../course.csv");
+            ofstream tempFile("temp.csv");
+            string line;
+            bool studentDropped = false;
+
+            while (getline(file, line)) {
+                vector<string> data = split(line, ',');
+                if (data[0] == courseName) {
+                    tempFile << data[0] << "," << data[1];
+                    for (size_t i = 2; i < data.size(); i++) {
+                        if (data[i] != studentName) {
+                            tempFile << "," << data[i];
+                        } else {
+                            studentDropped = true;
+                        }
+                    }
+                    tempFile << endl;
+                } else {
+                    tempFile << line << endl;
+                }
+            }
+
+            file.close();
+            tempFile.close();
+
+            if (studentDropped) {
+                remove("../course.csv");
+                rename("temp.csv", "../course.csv");
+                cout << "Student dropped from course successfully!" << endl;
+            } else {
+                remove("temp.csv");
+                cout << "Error: Student not found in the course!" << endl;
+            }
+        }
     }
 
-    ifstream file("../course.csv");
-    ofstream tempFile("temp.csv");
-    string line;
+    // Delete a user from the system
+    void deleteUser() {
+        string fullName, role;
+        while (true) {
+            cout << "Enter full name (First and Last) to delete: ";
+            cin.ignore();
+            getline(cin, fullName);
 
-    bool found = false;
-    while (getline(file, line)) {
-        vector<string> data = split(line, ',');
-        if (data[0] == courseName) {
-            found = true;
-            tempFile << line << "," << studentName << endl;
+            cout << "Enter role (Admin, Teacher, or Student): ";
+            getline(cin, role);
+
+            // Determine file path based on role
+            string filePath;
+            if (role == "Admin") filePath = "../admin.csv";
+            else if (role == "Teacher") filePath = "../teacher.csv";
+            else if (role == "Student") filePath = "../student.csv";
+            else {
+                cout << "Error: Invalid role! Please try again." << endl;
+                if (exitPrompt()) return;
+                continue;
+            }
+
+            ifstream file(filePath);
+            ofstream tempFile("temp.csv");
+            string line;
+            bool userFound = false;
+
+            // Search for the user and copy all other users to the temp file
+            while (getline(file, line)) {
+                vector<string> data = split(line, ',');
+                if (data[0] == fullName) {
+                    userFound = true; // Skip the user to be deleted
+                } else {
+                    tempFile << line << endl;
+                }
+            }
+
+            file.close();
+            tempFile.close();
+
+            if (userFound) {
+                remove(filePath.c_str());
+                rename("temp.csv", filePath.c_str());
+                cout << role << " user deleted successfully!" << endl;
+            } else {
+                remove("temp.csv");
+                cout << "Error: User not found!" << endl;
+            }
+            break;
+        }
+    }
+
+    // View all courses
+    void viewCourses() {
+        ifstream file("../course.csv");
+        if (!file.is_open()) {
+            cout << "Error: Could not open file courses.csv" << endl;
+            return;
+        }
+
+        string line;
+        cout << "Courses List:\n";
+        cout << "Course Name | Instructor | Enrolled Students\n";
+        while (getline(file, line)) {
+            vector<string> data = split(line, ',');
+            cout << data[0] << " | " << data[1];
+            for (size_t i = 2; i < data.size(); i++) {
+                cout << " | " << data[i];
+            }
+            cout << endl;
+        }
+        file.close();
+    }
+
+private:
+    // Prompt the admin to exit or retry
+    bool exitPrompt() {
+        char choice;
+        cout << "Do you want to exit? (y/n): ";
+        cin >> choice;
+        return tolower(choice) == 'y';
+    }
+
+    // Utility function to split a string by a delimiter
+    vector<string> split(const string &str, char delimiter) {
+        vector<string> tokens;
+        string token;
+        istringstream tokenStream(str);
+        while (getline(tokenStream, token, delimiter)) {
+            tokens.push_back(token);
+        }
+        return tokens;
+    }
+
+    // Append a row to a file
+    void appendToFile(const string &filePath, const string &row) {
+        ofstream file(filePath, ios::app);
+        if (file.is_open()) {
+            file << row << endl;
+            file.close();
         } else {
-            tempFile << line << endl;
+            cout << "Error: Could not open file for writing!" << endl;
         }
     }
-    file.close();
-    tempFile.close();
-    remove("../course.csv");
-    rename("temp.csv", "../course.csv");
 
-    if (found) {
-        cout << "Student enrolled successfully!" << endl;
-    } else {
-        cout << "Course not found!" << endl;
-    }
-}
-
-void viewCourses() {
-    ifstream file("../course.csv");
-    if (!file.is_open()) {
-        cout << "Error: Could not open file courses.csv" << endl;
-        return;
-    }
-
-    string line;
-    cout << "Courses List:" << endl;
-    cout << "Course Name | Instructor | Enrolled Students" << endl;
-    while (getline(file, line)) {
-        vector<string> data = split(line, ',');
-        cout << data[0] << " | " << data[1];
-        for (size_t i = 2; i < data.size(); i++) {
-            cout << " | " << data[i];
+    // Check if a course exists
+    bool isValidCourse(const string &courseName) {
+        ifstream file("../course.csv");
+        string line;
+        while (getline(file, line)) {
+            vector<string> data = split(line, ',');
+            if (data[0] == courseName) {
+                file.close();
+                return true;
+            }
         }
-        cout << endl;
+        file.close();
+        return false;
     }
-    file.close();
-}
 
+    // Delete entries related to a specific course in a file
+    void deleteRelatedFiles(const string &courseName, const string &filePath) {
+        ifstream file(filePath);
+        ofstream tempFile("temp.csv");
+        string line;
+
+        while (getline(file, line)) {
+            vector<string> data = split(line, ',');
+            if (data[0] != courseName) {
+                tempFile << line << endl;
+            }
+        }
+
+        file.close();
+        tempFile.close();
+        remove(filePath.c_str());
+        rename("temp.csv", filePath.c_str());
+    }
+};
 
 #endif
