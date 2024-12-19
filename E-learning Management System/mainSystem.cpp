@@ -11,7 +11,7 @@ using namespace std;
 // Main Menu
 void displayMenu(const string &role) {
     if (role == "Admin") {
-        cout << "1. Add User\n2. Create Course\n3. Enroll Student\n4. View Courses\n5. Exit\n";
+        cout << "1. Add User\n2. Create Course\n3. Enroll Student\n4. View Courses\n5.Delete Course\n6.Delete User\n7.Drop Student from course\n8. Exit\n";
     } else if (role == "Teacher") {
         cout << "\n=== Teacher Menu ===\n";
         cout << "1. Manage Lessons\n";
@@ -86,7 +86,7 @@ int main() {
     cout << "Login successful! Welcome, " << username << " (" << role << ")" << endl;
 
     // Role-Based Menu and Functionalities
-    int exitOption = (role == "Admin") ? 5 : (role == "Teacher" ? 6 : 8);
+    int exitOption = (role == "Admin") ? 8 : (role == "Teacher" ? 6 : 8);
     int choice;
 
     do {
@@ -94,11 +94,15 @@ int main() {
         cin >> choice;
 
         if (role == "Admin") {
-            if (choice == 1) addUser();
-            else if (choice == 2) createCourse();
-            else if (choice == 3) enrollStudent();
-            else if (choice == 4) viewCourses();
-            else if (choice == 5) break;
+            Admin admin;
+            if (choice == 1) admin.addUser();
+            else if (choice == 2) admin.createCourse();
+            else if (choice == 3) admin.enrollStudent();
+            else if (choice == 4) admin.viewCourses();
+            else if (choice == 5) admin.deleteCourse();
+            else if (choice == 6) admin.deleteUser();
+            else if (choice == 7) admin.dropStudentFromCourse();
+            else if (choice == 8) break; // Exit
         } 
         else if (role == "Teacher") {
             Teacher teacher(username, password);
