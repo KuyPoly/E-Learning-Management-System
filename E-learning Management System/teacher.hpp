@@ -292,7 +292,33 @@ void gradeAssignment() {
         }
     }
 
-    void displayInfo() {
+    void manageAssignments() {
+        int choice;
+        do {
+            cout << "\n=== Assignment Management ===\n";
+            cout << "1. Add Assignment\n";
+            cout << "2. Grade Assignment\n";
+            cout << "3. Back to Main Menu\n";
+            cout << "Enter your choice: ";
+            cin >> choice;
+
+            switch (choice) {
+                case 1:
+                    addAssignment();
+                    break;
+                case 2:
+                    gradeAssignment();
+                    break;
+                case 3:
+                    cout << "Returning to main menu...\n";
+                    break;
+                default:
+                    cout << "Invalid choice!\n";
+            }
+        } while (choice != 3);
+    }
+
+    void displayStudentInfo() {
         ifstream courseFile("../course.csv");
         if (!courseFile.is_open()) {
             cout << "Error: Unable to open course file!" << endl;
@@ -323,6 +349,123 @@ void gradeAssignment() {
         if (!foundCourse) {
             cout << "You are not teaching any courses." << endl;
         }
+    }
+
+        void displayPersonalInfo() {
+        ifstream teacherFile("../teacher.csv");
+        if (!teacherFile.is_open()) {
+            cout << "Error: Unable to open teacher file!" << endl;
+            return;
+        }
+
+        string line;
+        bool found = false;
+        while (getline(teacherFile, line)) {
+            vector<string> teacherData = split(line, ',');
+            if (teacherData.size() >= 2 && teacherData[0] == username) {
+                cout << "\nTeacher Personal Information:" << endl;
+                cout << "-------------------------" << endl;
+                cout << "Username: " << teacherData[0] << endl;
+                cout << "Password: " << teacherData[1] << endl;
+                found = true;
+                break;
+            }
+        }
+        teacherFile.close();
+
+        if (!found) {
+            cout << "Teacher information not found!" << endl;
+        }
+    }
+
+        void changePassword() {
+        string newPassword;
+        bool validPassword = false;
+
+        do {
+            cout << "\nEnter new password (must be 6 characters, can be letters or numbers): ";
+            cin >> newPassword;
+
+            // Check if password is exactly 6 characters
+            if (newPassword.length() != 6) {
+                cout << "Password must be exactly 6 characters long!" << endl;
+                continue;
+            }
+
+            // Check if password contains only letters and numbers
+            bool validChars = true;
+            for (char c : newPassword) {
+                if (!isalnum(c)) {  // checks if character is letter or number
+                    validChars = false;
+                    break;
+                }
+            }
+
+            if (!validChars) {
+                cout << "Password can only contain letters and numbers!" << endl;
+                continue;
+            }
+
+            validPassword = true;
+
+        } while (!validPassword);
+
+        // Read all teachers from file
+        vector<string> allTeachers;
+        ifstream readFile("../teacher.csv");
+        string line;
+        
+        while (getline(readFile, line)) {
+            vector<string> teacherData = split(line, ',');
+            if (teacherData[0] == username) {
+                // Update this teacher's password
+                allTeachers.push_back(username + "," + newPassword);
+            } else {
+                allTeachers.push_back(line);
+            }
+        }
+        readFile.close();
+
+        // Write all teachers back to file
+        ofstream writeFile("../teacher.csv");
+        for (const string& teacherLine : allTeachers) {
+            writeFile << teacherLine << endl;
+        }
+        writeFile.close();
+
+        // Update the password in current object
+        this->password = newPassword;
+        cout << "Password changed successfully!" << endl;
+    }
+
+    void displayInformation() {
+        int choice;
+        do {
+            cout << "\n=== Information Display ===\n";
+            cout << "1. Display Personal Information\n";
+            cout << "2. Display Student & Course Information\n";
+            cout << "3. Change Password\n";
+            cout << "4. Back to Main Menu\n";
+            cout << "Enter your choice: ";
+            cin >> choice;
+
+            switch (choice) {
+                case 1:
+                    displayPersonalInfo();
+                    break;
+                case 2:
+                    displayStudentInfo();  
+                    break;
+                case 3:
+                    changePassword();
+                    break;
+                case 4:
+                    cout << "Returning to main menu...\n";
+                    break;
+                default:
+                    cout << "Invalid choice!\n";
+            }
+        } while (choice != 4);
     }
 
     void manageLessons() {

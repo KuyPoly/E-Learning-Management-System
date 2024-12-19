@@ -403,9 +403,94 @@ public:
         }
         cout << "---------------------------------------------------" << endl;
     }
-    
+
+    /*MENU*/
+    void manageAssignments() {
+    int choice;
+    do {
+        cout << "\n=== Assignment Management ===\n";
+        cout << "1. View Assignments\n";
+        cout << "2. Submit Assignment\n";
+        cout << "3. View Grades\n";
+        cout << "4. Back to Main Menu\n";
+        cout << "==================\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                viewAssignments();
+                break;
+            case 2:
+                submitAssignment();
+                break;
+            case 3:
+                viewGrade();
+                break;
+            case 4:
+                cout << "Returning to main menu...\n";
+                break;
+            default:
+                cout << "Invalid choice!\n";
+        }
+    } while (choice != 4);
+}
+
+void manageProfile() {
+    int choice;
+    do {
+        cout << "\n=== Profile Management ===\n";
+        cout << "1. View Personal Information\n";
+        cout << "2. Change Password\n";
+        cout << "3. Back to Main Menu\n";
+        cout << "==================\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                displayInformation();
+                break;
+            case 2:
+                changePassword();
+                break;
+            case 3:
+                cout << "Returning to main menu...\n";
+                break;
+            default:
+                cout << "Invalid choice!\n";
+        }
+    } while (choice != 3);
+}
+
+void viewAcademicProgress() {
+    int choice;
+    do {
+        cout << "\n=== Progress Tracking ===\n";
+        cout << "1. View Enrolled Courses\n";
+        cout << "2. View Academic Progress\n";
+        cout << "3. Back to Main Menu\n";
+        cout << "==================\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                viewEnrolledCourses();
+                break;
+            case 2:
+                viewProgress();
+                break;
+            case 3:
+                cout << "Returning to main menu...\n";
+                break;
+            default:
+                cout << "Invalid choice!\n";
+        }
+    } while (choice != 3);
+}
+
+
 };
-
-
 
 #endif

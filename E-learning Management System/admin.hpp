@@ -317,6 +317,92 @@ public:
         file.close();
     }
 
+    /*MENU*/
+    void manageUsers() {
+    int choice;
+    do {
+        cout << "\n=== User Management ===\n";
+        cout << "1. Add User\n";
+        cout << "2. Delete User\n";
+        cout << "3. Back to Main Menu\n";
+        cout << "==================\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                addUser();
+                break;
+            case 2:
+                deleteUser();
+                break;
+            case 3:
+                cout << "Returning to main menu...\n";
+                break;
+            default:
+                cout << "Invalid choice!\n";
+        }
+    } while (choice != 3);
+}
+
+void manageCourses() {
+    int choice;
+    do {
+        cout << "\n=== Course Management ===\n";
+        cout << "1. Create Course\n";
+        cout << "2. Delete Course\n";
+        cout << "3. View All Courses\n";
+        cout << "4. Back to Main Menu\n";
+        cout << "==================\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                createCourse();
+                break;
+            case 2:
+                deleteCourse();
+                break;
+            case 3:
+                viewCourses();
+                break;
+            case 4:
+                cout << "Returning to main menu...\n";
+                break;
+            default:
+                cout << "Invalid choice!\n";
+        }
+    } while (choice != 4);
+}
+
+void manageEnrollments() {
+    int choice;
+    do {
+        cout << "\n=== Enrollment Management ===\n";
+        cout << "1. Enroll Student\n";
+        cout << "2. Drop Student from Course\n";
+        cout << "3. Back to Main Menu\n";
+        cout << "==================\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                enrollStudent();
+                break;
+            case 2:
+                dropStudentFromCourse();
+                break;
+            case 3:
+                cout << "Returning to main menu...\n";
+                break;
+            default:
+                cout << "Invalid choice!\n";
+        }
+    } while (choice != 3);
+}
+
 private:
     // Prompt the admin to exit or retry
     bool exitPrompt() {
@@ -381,6 +467,7 @@ private:
         remove(filePath.c_str());
         rename("temp.csv", filePath.c_str());
     }
+
 };
 
 #endif

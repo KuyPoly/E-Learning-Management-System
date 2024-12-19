@@ -11,19 +11,32 @@ using namespace std;
 // Main Menu
 void displayMenu(const string &role) {
     if (role == "Admin") {
-        cout << "1. Add User\n2. Create Course\n3. Enroll Student\n4. View Courses\n5.Delete Course\n6.Delete User\n7.Drop Student from course\n8. Exit\n";
-    } else if (role == "Teacher") {
-        cout << "\n=== Teacher Menu ===\n";
-        cout << "1. Manage Lessons\n";
-        cout << "2. Add Assignment\n";
-        cout << "3. Grade Assignment\n";
-        cout << "4. View Student Progress\n";
-        cout << "5. Display Student & Course Info\n";
-        cout << "6. Exit\n";
+        cout << "\n=== Admin Menu ===\n";
+        cout << "1. User Management\n";
+        cout << "2. Course Management\n";
+        cout << "3. Enrollment Management\n";
+        cout << "4. Exit\n";
         cout << "==================\n";
         cout << "Enter your choice: ";
-    } else if (role == "Student") {
-        cout << "1. View Enrolled Courses\n2. Change Password\n3. View assignment\n4. Submit Assignment\n5. View grade\n6. View progress\n7. display Information\n8. Exit\n";
+    } 
+    else if (role == "Teacher") {
+        cout << "\n=== Teacher Menu ===\n";
+        cout << "1. Manage Lessons\n";
+        cout << "2. Manage Assignments\n";
+        cout << "3. View Student Progress\n";
+        cout << "4. Display Information\n";
+        cout << "5. Exit\n";
+        cout << "==================\n";
+        cout << "Enter your choice: ";
+    } 
+    else if (role == "Student") {
+        cout << "\n=== Student Menu ===\n";
+        cout << "1. Assignment Management\n";
+        cout << "2. Profile Management\n";
+        cout << "3. Progress Tracking\n";
+        cout << "4. Exit\n";
+        cout << "==================\n";
+        cout << "Enter your choice: ";
     }
 }
 
@@ -86,45 +99,74 @@ int main() {
     cout << "Login successful! Welcome, " << username << " (" << role << ")" << endl;
 
     // Role-Based Menu and Functionalities
-    int exitOption = (role == "Admin") ? 8 : (role == "Teacher" ? 6 : 8);
+    int exitOption = (role == "Admin") ? 8 : (role == "Teacher" ? 5 : 8);
     int choice;
 
-    do {
-        displayMenu(role);
-        cin >> choice;
+do {
+    displayMenu(role);
+    cin >> choice;
 
-        if (role == "Admin") {
-            Admin admin;
-            if (choice == 1) admin.addUser();
-            else if (choice == 2) admin.createCourse();
-            else if (choice == 3) admin.enrollStudent();
-            else if (choice == 4) admin.viewCourses();
-            else if (choice == 5) admin.deleteCourse();
-            else if (choice == 6) admin.deleteUser();
-            else if (choice == 7) admin.dropStudentFromCourse();
-            else if (choice == 8) break; // Exit
-        } 
-        else if (role == "Teacher") {
-            Teacher teacher(username, password);
-            if (choice == 1) teacher.manageLessons();
-            else if (choice == 2) teacher.addAssignment();
-            else if (choice == 3) teacher.gradeAssignment();
-            else if (choice == 4) teacher.viewProgress();
-            else if (choice == 5) teacher.displayInfo();
-            else if (choice == 6) break;
-        } 
-        else if (role == "Student") {
-            Student student(username, password);
-            if (choice == 1) student.viewEnrolledCourses();
-            else if (choice == 2) student.changePassword();
-            else if (choice == 3) student.viewAssignments();
-            else if (choice == 4) student.submitAssignment();
-            else if (choice == 5) student.viewGrade();
-            else if (choice == 6) student.viewProgress();
-            else if (choice == 7) student.displayInformation();
-            else if (choice == 8) break;
+    if (role == "Admin") {
+        Admin admin;
+        switch (choice) {
+            case 1:
+                admin.manageUsers();  
+                break;
+            case 2:
+                admin.manageCourses();  
+                break;
+            case 3:
+                admin.manageEnrollments();  
+                break;
+            case 4:
+                cout << "Goodbye!" << endl;
+                return 0;
+            default:
+                cout << "Invalid choice!" << endl;
         }
-    } while (choice != exitOption);
+    } 
+    else if (role == "Teacher") {
+        Teacher teacher(username, password);
+        switch (choice) {
+            case 1:
+                teacher.manageLessons();
+                break;
+            case 2:
+                teacher.manageAssignments();
+                break;
+            case 3:
+                teacher.viewProgress();
+                break;
+            case 4:
+                teacher.displayInformation();
+                break;
+            case 5:
+                cout << "Goodbye!" << endl;
+                return 0;
+            default:
+                cout << "Invalid choice!" << endl;
+        }
+    }
+    else if (role == "Student") {
+        Student student(username, password);
+        switch (choice) {
+            case 1:
+                student.manageAssignments();  // New grouped function
+                break;
+            case 2:
+                student.manageProfile();  // New grouped function
+                break;
+            case 3:
+                student.viewAcademicProgress();  // New grouped function
+                break;
+            case 4:
+                cout << "Goodbye!" << endl;
+                return 0;
+            default:
+                cout << "Invalid choice!" << endl;
+        }
+    }
+} while (true);
 
     cout << "Goodbye!" << endl;
     return 0;
