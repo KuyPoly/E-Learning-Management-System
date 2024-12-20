@@ -15,7 +15,8 @@ void displayMenu(const string &role) {
         cout << "1. User Management\n";
         cout << "2. Course Management\n";
         cout << "3. Enrollment Management\n";
-        cout << "4. Exit\n";
+        cout << "4. Display Information\n";
+        cout << "5. Exit\n";
         cout << "==================\n";
         cout << "Enter your choice: ";
     } 
@@ -99,7 +100,7 @@ int main() {
     cout << "Login successful! Welcome, " << username << " (" << role << ")" << endl;
 
     // Role-Based Menu and Functionalities
-    int exitOption = (role == "Admin") ? 8 : (role == "Teacher" ? 5 : 8);
+    int exitOption = (role == "Admin") ? 5 : (role == "Teacher" ? 5 : 4);
     int choice;
 
 do {
@@ -119,6 +120,9 @@ do {
                 admin.manageEnrollments();  
                 break;
             case 4:
+                admin.manageProfile(username); 
+                break;
+            case 5:
                 cout << "Goodbye!" << endl;
                 return 0;
             default:

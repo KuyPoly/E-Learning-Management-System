@@ -25,6 +25,12 @@ public:
             cout << "Enter password: ";
             getline(cin, password);
 
+            if (password.empty() || password.size() < 6 ) {
+                cout << "Error: Password cannot be empty ot less than 6 characters" << endl;
+                if (exitPrompt()) return;
+                continue;
+            }
+
             string filePath;
             if (role == "Admin") filePath = "../admin.csv";
             else if (role == "Teacher") filePath = "../teacher.csv";
@@ -280,6 +286,7 @@ public:
                 remove("temp.csv");
                 cout << "Error: Student not found in the course!" << endl;
             }
+            break;
         }
     }
 
@@ -304,6 +311,106 @@ public:
         }
         file.close();
     }
+
+    void displayAdminInfo(const string &currentAdmin) const {
+        ifstream file("../admin.csv");
+        if (!file.is_open()) {
+            cout << "Error: Could not open admin.csv file!" << endl;
+            return;
+        }
+
+        string line;
+        bool found = false;
+        while (getline(file, line)) {
+            vector<string> data = split(line, ',');
+            if (data.size() >= 2 && data[0] == currentAdmin) { // Match current admin
+                cout << "\n=== Your Information ===\n";
+                cout << "Full Name: " << data[0] << "\n";
+                cout << "Password: " << data[1] << "\n";
+                cout << "=========================\n";
+                found = true;
+                break;
+            }
+        }
+
+        file.close();
+
+        if (!found) {
+            cout << "Error: User information not found in admin.csv!" << endl;
+        }
+    }
+
+    // Change Password
+    void changePassword(const string &currentAdmin) {
+        string oldPassword, newPassword, confirmPassword;
+
+        while (true) {
+            cout << "Enter your old password: ";
+            cin >> oldPassword;
+
+            ifstream file("../admin.csv");
+            if (!file.is_open()) {
+                cout << "Error: Could not open file admin.csv" << endl;
+                return;
+            }
+
+            vector<string> lines;
+            string line;
+            bool passwordUpdated = false;
+
+            while (getline(file, line)) {
+                vector<string> data = split(line, ',');
+                if (data[0] == currentAdmin) {
+                    if (data[1] == oldPassword) {
+                        cout << "Enter new password: ";
+                        cin >> newPassword;
+                        cout << "Confirm new password: ";
+                        cin >> confirmPassword;
+
+                        if (newPassword != confirmPassword) {
+                            cout << "Passwords do not match!" << endl;
+                            lines.push_back(line);
+                            continue;
+                        }
+
+                        lines.push_back(data[0] + "," + newPassword);
+                        cout << "Password updated successfully!" << endl;
+                        passwordUpdated = true;
+                    } else {
+                        cout << "Old password is incorrect!" << endl;
+                        lines.push_back(line);
+                    }
+                } else {
+                    lines.push_back(line);
+                }
+            }
+
+            file.close();
+
+            if (passwordUpdated) {
+                ofstream outFile("../admin.csv");
+                if (!outFile.is_open()) {
+                    cerr << "Error: Unable to write to file!" << endl;
+                    return;
+                }
+
+                for (const string &updatedLine : lines) {
+                    outFile << updatedLine << endl;
+                }
+
+                outFile.close();
+                return;
+            } else {
+                cout << "Press 1 to try again or 2 to exit: ";
+                int choice;
+                cin >> choice;
+                if (choice == 2) {
+                    return;
+                }
+            }
+        }
+    }
+
 
     // Manage users menu
     void manageUsers() {
@@ -393,6 +500,33 @@ public:
         } while (choice != 3);
     }
 
+    void manageProfile(const string &currentAdmin) {
+        int choice;
+        do {
+            cout << "\n=== Profile Management ===\n";
+            cout << "1. View Personal Information\n";
+            cout << "2. Change Password\n";
+            cout << "3. Back to Main Menu\n";
+            cout << "==================\n";
+            cout << "Enter your choice: ";
+            cin >> choice;
+
+            switch (choice) {
+                case 1:
+                    displayAdminInfo(currentAdmin);
+                    break;
+                case 2:
+                    changePassword(currentAdmin);
+                    break;
+                case 3:
+                    cout << "Returning to main menu...\n";
+                    break;
+                default:
+                    cout << "Invalid choice!\n";
+            }
+        } while (choice != 3);
+    }
+
 private:
     // Prompt the admin to exit or retry
     bool exitPrompt() {
@@ -459,6 +593,18 @@ private:
         file.close();
         return false;
     }
+        // Utility function to split a string by a delimiter
+    vector<string> split(const string &str, char delimiter) const {
+        vector<string> tokens;
+        string token;
+        istringstream tokenStream(str);
+        while (getline(tokenStream, token, delimiter)) {
+            tokens.push_back(token);
+        }
+        return tokens;
+    }
+
+    string currentAdmin;
 };
 
 #endif
