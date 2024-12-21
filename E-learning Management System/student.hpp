@@ -76,6 +76,14 @@ public:
                         cin >> new_password;
                         cout << "Confirm new password: ";
                         cin >> confirm_password;
+                        
+                        // Allowing passwords 6 or more characters long
+                        if (new_password.length() < 6) {
+                            cout << "New password must be than 6 characters!" << endl;
+                            lines.push_back(line);
+                            continue;
+
+                        }
 
                         if (new_password != confirm_password) {
                             cout << "Passwords do not match!" << endl;
