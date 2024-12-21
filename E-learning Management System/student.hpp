@@ -201,10 +201,62 @@ public:
         string selected_course = coursesAssignments[choice - 1].first;
         string selected_assignment = coursesAssignments[choice - 1].second;
 
-        string submission_text;
-        cout << "Enter your submission for " << selected_assignment << ": " << endl;
-        cin.ignore();
-        getline(cin, submission_text);
+        string submission;
+        bool validInput = false;
+
+        while (!validInput) {
+            cout << "Submitting for assignment: " << selected_assignment << endl;
+            cout << "Enter either a file path or a link to submit (or type 'delete' to remove a wrong submission): ";
+            cin.ignore();
+            getline(cin, submission);
+
+            // Trim whitespace
+            submission.erase(0, submission.find_first_not_of(" \t\n\r"));
+            submission.erase(submission.find_last_not_of(" \t\n\r") + 1);
+
+            if (submission == "delete") {
+                // Check if the user has a submission to delete
+                ifstream submissionsFile("../submissions.csv");
+                vector<string> lines;
+                bool found = false;
+
+                while (getline(submissionsFile, line)) {
+                    vector<string> data = split(line, ',');
+                    if (data.size() >= 4 && data[0] == username && data[1] == selected_course && data[2] == selected_assignment) {
+                        // This is the submission to delete
+                        found = true;
+                    } else {
+                        lines.push_back(line); // Keep other submissions
+                    }
+                }
+
+                submissionsFile.close();
+
+                if (found) {
+                    // Rewrite the file excluding the deleted entry
+                    ofstream outFile("../submissions.csv");
+                    for (const auto& l : lines) {
+                        outFile << l << endl;
+                    }
+
+                    cout << "Your submission for assignment " << selected_assignment << " has been deleted." << endl;
+                } else {
+                    cout << "No submission found to delete." << endl;
+                }
+                return; // Exit after deletion attempt
+            }
+
+            // Determine if the submission is valid
+            if (submission.empty()) {
+                cout << "Submission cannot be empty. Please try again." << endl;
+            } else if (submission.find("http://") == 0 || submission.find("https://") == 0) {
+                validInput = true; // It's a valid link
+            } else if (submission.find(":\\") != string::npos || submission.find("/") != string::npos) {
+                validInput = true; 
+            } else {
+                cout << "Invalid submission format. Please enter a valid file path or link." << endl;
+            }
+        }
 
         ofstream submissionsFile("../submissions.csv", ios::app);
 
@@ -213,11 +265,21 @@ public:
             return;
         }
 
-        submissionsFile << username << "," << selected_course << "," << selected_assignment << "," << submission_text << endl;
-        cout << "Assignment submitted successfully!" << endl;
+        // Check if the submission is a link or file
+        bool isLink = submission.find("http://") == 0 || submission.find("https://") == 0;
+
+        if (isLink) {
+            submissionsFile << username << "," << selected_course << "," << selected_assignment << ",Link," << submission << endl;
+            cout << "Link submitted successfully!" << endl;
+        } else {
+            submissionsFile << username << "," << selected_course << "," << selected_assignment << ",File," << submission << endl;
+            cout << "File submitted successfully!" << endl;
+        }
 
         submissionsFile.close();
     }
+
+
         void viewGrade() const {
         ifstream gradesFile("../grades.csv");
         if (!gradesFile.is_open()) {
