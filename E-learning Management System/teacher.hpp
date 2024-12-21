@@ -8,6 +8,7 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include <map>
 
 using namespace std;
 
@@ -30,9 +31,10 @@ public:
     vector<string> filePaths;
     vector<string> links;
     string details;
+    string course;
 
-    Lesson(const string& title, const string& content)
-        : title(title), content(content) {}
+    Lesson(const string& title, const string& content, const string& course = "")
+        : title(title), content(content), course(course) {}
 
     void addFile(const string& filePath) {
         filePaths.push_back(filePath);
@@ -50,7 +52,7 @@ public:
     }
 
     void display() const {
-        cout << "\nTitle: " << title << "\nContent: " << content << "\n";
+        cout << "\nCourse: " << course << "\nTitle: " << title << "\nContent: " << content << "\n";
         if (!filePaths.empty()) {
             cout << "Attached Files:\n";
             for (const auto& file : filePaths) {
@@ -78,37 +80,135 @@ public:
 // LessonManager class definition
 class LessonManager {
 private:
+    map<string, vector<Lesson>> courseLessons;
     vector<Lesson> lessons;
 
 public:
-    void addLesson(const Lesson& lesson) {
-        lessons.push_back(lesson);
-        cout << "Lesson added successfully: " << lesson.title << "\n";
+    string selectCourse() {
+        ifstream courseFile("../course.csv");
+        if (!courseFile.is_open()) {
+            cout << "Error: Unable to open course file.\n";
+            return "";
+        }
+
+        vector<string> courses;
+        string line;
+        while (getline(courseFile, line)) {
+            courses.push_back(line);
+        }
+        courseFile.close();
+
+        if (courses.empty()) {
+            cout << "No courses available.\n";
+            return "";
+        }
+
+        cout << "Available Courses:\n";
+        for (size_t i = 0; i < courses.size(); ++i) {
+            cout << i + 1 << ". " << courses[i] << "\n";
+        }
+
+        int choice;
+        cout << "Select a course by number: ";
+        cin >> choice;
+
+        if (choice < 1 || choice > courses.size()) {
+            cout << "Invalid choice.\n";
+            return "";
+        }
+
+        return courses[choice - 1];
     }
+
+    void addLessonToCourse(const Lesson& newLesson, const string& course) {
+        courseLessons[course].push_back(newLesson);
+        cout << "Lesson added to course: " << course << "\n";
+        saveLessonToFile(newLesson, course); 
+    } 
+
+    void addLesson(const Lesson& newLesson) {
+        lessons.push_back(newLesson);
+        cout << "Lesson added.\n";
+        saveLessonToFile(newLesson, ""); 
+    }
+
+    void saveLessonToFile(const Lesson& lesson, const string& course) {
+    ofstream lessonFile("../lesson.csv", ios::app);
+    if (!lessonFile.is_open()) {
+        cout << "Error: Unable to open lesson file.\n";
+        return;
+    }
+
+    cout << "Saving lesson to file: " << lesson.title << "," << course << "," << lesson.details << "\n"; // Debugging statement
+    lessonFile << lesson.title << "," << course << "," << lesson.details << "\n";
+    lessonFile.close();
+    }
+
 
     void deleteLesson(const string& lessonTitle) {
-        auto it = remove_if(lessons.begin(), lessons.end(),
-                            [&lessonTitle](const Lesson& lesson) {
-                                return lesson.title == lessonTitle;
-                            });
-        if (it != lessons.end()) {
-            lessons.erase(it, lessons.end());
-            cout << "Lesson deleted successfully: " << lessonTitle << "\n";
-        } else {
-            cout << "Lesson not found: " << lessonTitle << "\n";
-        }
+    auto it = remove_if(lessons.begin(), lessons.end(),
+                        [&lessonTitle](const Lesson& lesson) {
+                            return lesson.title == lessonTitle;
+                        });
+    if (it != lessons.end()) {
+        lessons.erase(it, lessons.end());
+        cout << "Lesson deleted successfully: " << lessonTitle << "\n";
+        deleteLessonFromFile(lessonTitle); // Call the method to delete from file
+    } else {
+        cout << "Lesson not found: " << lessonTitle << "\n";
+    }
+}
+
+    void deleteLessonFromFile(const string& lessonTitle) {
+    ifstream lessonFile("../lesson.csv");
+    if (!lessonFile.is_open()) {
+        cout << "Error: Unable to open lesson file.\n";
+        return;
     }
 
-    void displayAllLessons() const {
-        if (lessons.empty()) {
-            cout << "No lessons available.\n";
-        } else {
-            cout << "Available Lessons:\n";
-            for (const auto& lesson : lessons) {
-                lesson.display();
-            }
+    vector<string> lines;
+    string line;
+    while (getline(lessonFile, line)) {
+        if (line.find(lessonTitle) == string::npos) {
+            lines.push_back(line);
         }
     }
+    lessonFile.close();
+
+    ofstream outFile("../lesson.csv");
+    if (!outFile.is_open()) {
+        cout << "Error: Unable to open lesson file for writing.\n";
+        return;
+    }
+
+    for (const auto& l : lines) {
+        outFile << l << "\n";
+    }
+    outFile.close();
+}
+
+    void displayAllLessons() const {
+        ifstream lessonFile("../lesson.csv");
+            if (!lessonFile.is_open()) {
+                cout << "Error: Unable to open lesson file.\n";
+                return;
+            }
+
+        string line;
+        while (getline(lessonFile, line)) {
+            cout << "Lessons: " << line << "\n"; // Debugging statement
+            vector<string> lessonDetails = splitLine(line, ',');
+            if (lessonDetails.size() >= 3) {
+                cout << "Title: " << lessonDetails[0] << "\n";
+                cout << "Course: " << lessonDetails[1] << "\n";
+                cout << "Details: " << lessonDetails[2] << "\n";
+                cout << "\n";
+            }
+        }
+            lessonFile.close();
+    }
+
+
 };
 
 // Teacher class definition
@@ -147,10 +247,37 @@ private:
    }
 
 public:
+
     Teacher(string username, string password) {
         this->username = username;
         this->password = password;
     }
+
+        string selectCourse() {
+        return lessonManager.selectCourse();
+    }
+
+    void addLesson(const Lesson& newLesson) {
+        lessonManager.addLesson(newLesson);
+    }
+    
+    void addLessonToCourse(const Lesson& newLesson) {
+        string course = selectCourse();
+        if (course.empty()) {
+            cout << "No course selected. Cannot add lesson.\n";
+            return;
+        }
+        lessonManager.addLessonToCourse(newLesson, course);
+    }
+
+    void deleteLesson(const string& title) {
+        lessonManager.deleteLesson(title);
+    }
+
+    void displayAllLessons() {
+        lessonManager.displayAllLessons();
+    }
+
 
     void addAssignment() {
         vector<string> teacherCourses;
@@ -490,37 +617,47 @@ public:
 
             switch (choice) {
                 case 1: {
+                    string course = selectCourse();
+                    if (course.empty()) {
+                        cout << "No course selected. Returning to menu.\n";
+                        break;
+                    }
+
                     string title, content;
                     cout << "Enter lesson title: ";
+                    cin.ignore();
                     getline(cin, title);
+
                     cout << "Enter lesson content: ";
                     getline(cin, content);
                     
-                    Lesson newLesson(title, content);
+                    Lesson newLesson(title, content, course);
                     
                     char addMore;
-                    cout << "Add file path? (y/n): ";
-                    cin >> addMore;
-                    cin.ignore();
-                    if (addMore == 'y') {
-                        string filePath;
-                        cout << "Enter file path: ";
-                        getline(cin, filePath);
-                        newLesson.addFile(filePath);
-                    }
-                    
-                    lessonManager.addLesson(newLesson);
+                    do {
+                        cout << "Add file path? (y/n): ";
+                        cin >> addMore;
+                        cin.ignore();
+                        if (addMore == 'y') {
+                            string filePath;
+                            cout << "Enter file path: ";
+                            getline(cin, filePath);
+                            newLesson.addFile(filePath);
+                        }
+                    } while (addMore == 'y');
+
+                    addLesson(newLesson);
                     break;
                 }
                 case 2: {
                     string title;
                     cout << "Enter lesson title to delete: ";
                     getline(cin, title);
-                    lessonManager.deleteLesson(title);
+                    deleteLesson(title);
                     break;
                 }
                 case 3:
-                    lessonManager.displayAllLessons();
+                    displayAllLessons();
                     break;
                 case 4:
                     cout << "Returning to main menu...\n";
