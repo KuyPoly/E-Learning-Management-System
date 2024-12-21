@@ -256,70 +256,72 @@ public:
 
         submissionsFile.close();
     }
+    void deleteSubmission() {
+        ifstream submissionsFile("../submissions.csv"); // Open submissions file
 
-    void deleteAssignment() {
-        ifstream assignmentsFile("../assignments.csv");
-
-        if (!assignmentsFile.is_open()) {
-            cout << "Error: Could not open file assignments.csv" << endl;
+        if (!submissionsFile.is_open()) {
+            cout << "Error: Could not open file submissions.csv" << endl;
             return;
         }
 
-        vector<pair<string, string>> assignments;
+        vector<vector<string>> submissions;
         string line;
 
-        // Read all assignments into a vector
-        while (getline(assignmentsFile, line)) {
+        // Read all submissions into a vector
+        while (getline(submissionsFile, line)) {
             vector<string> data = split(line, ',');
-            if (data.size() >= 2) {
-                assignments.emplace_back(data[0], data[1]);
+            if (data.size() >= 4) { // Ensure the line has all necessary fields
+                submissions.push_back(data);
             }
         }
 
-        assignmentsFile.close();
+        submissionsFile.close();
 
-        // Check if there are assignments to delete
-        if (assignments.empty()) {
-            cout << "No assignments available to delete!" << endl;
+        // Check if there are submissions to delete
+        if (submissions.empty()) {
+            cout << "No submissions available to delete!" << endl;
             return;
         }
 
-        cout << "Available Assignments:" << endl;
-        cout << "---------------------------------------------" << endl;
-        cout << "No | Course ID | Assignment Name" << endl;
-        cout << "---------------------------------------------" << endl;
+        cout << "Your Submissions:" << endl;
+        cout << "---------------------------------------------------------------" << endl;
+        cout << "No | Course ID | Assignment Name | Submission" << endl;
+        cout << "---------------------------------------------------------------" << endl;
 
-        for (size_t i = 0; i < assignments.size(); ++i) {
-            cout << i + 1 << " | " << assignments[i].first << " | " << assignments[i].second << endl;
+        for (size_t i = 0; i < submissions.size(); ++i) {
+            if (submissions[i][0] == username) { // Only show user's submissions
+                cout << i + 1 << " | " << submissions[i][1] << " | " << submissions[i][2] << " | " << submissions[i][3] << endl;
+            }
         }
 
         int choice;
-        cout << "Enter the number of the assignment to delete: ";
+        cout << "Enter the number of the submission to delete: ";
         cin >> choice;
 
-        if (choice < 1 || choice > assignments.size()) {
+        if (choice < 1 || choice > submissions.size()) {
             cout << "Invalid choice!" << endl;
             return;
         }
 
-        // Remove the selected assignment
-        assignments.erase(assignments.begin() + (choice - 1));
+        // Remove the selected submission
+        submissions.erase(submissions.begin() + (choice - 1));
 
         // Write the updated list back to the file
-        ofstream assignmentsOutFile("../assignments.csv");
+        ofstream submissionsOutFile("../submissions.csv");
 
-        if (!assignmentsOutFile.is_open()) {
-            cout << "Error: Could not open file assignments.csv for writing!" << endl;
+        if (!submissionsOutFile.is_open()) {
+            cout << "Error: Could not open file submissions.csv for writing!" << endl;
             return;
         }
 
-        for (const auto& assignment : assignments) {
-            assignmentsOutFile << assignment.first << "," << assignment.second << endl;
+        for (const auto& submission : submissions) {
+            submissionsOutFile << submission[0] << "," << submission[1] << "," << submission[2] << "," << submission[3] << endl;
         }
 
-        assignmentsOutFile.close();
-        cout << "Assignment deleted successfully!" << endl;
+        submissionsOutFile.close();
+        cout << "Submission deleted successfully!" << endl;
     }
+
 
         void viewGrade() const {
         ifstream gradesFile("../grades.csv");
@@ -523,7 +525,7 @@ public:
         cout << "\n=== Assignment Management ===\n";
         cout << "1. View Assignments\n";
         cout << "2. Submit Assignment\n";
-        cout << "3. Delete Assignment\n";
+        cout << "3. Delete Submissions\n";
         cout << "4. View Grades\n";
         cout << "5. Back to Main Menu\n";
         cout << "==================\n";
@@ -538,7 +540,7 @@ public:
                 submitAssignment();
                 break;
             case 3:
-                deleteAssignment();
+                deleteSubmission();
                 break;
             case 4:
                 viewGrade();
