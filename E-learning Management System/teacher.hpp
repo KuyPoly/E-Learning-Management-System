@@ -117,6 +117,34 @@ private:
     string username;
     string password;
     LessonManager lessonManager;
+       // Helper method to clean and process file paths
+   string processFilePath(const string& filePath) const {
+       string processedPath = filePath;
+       
+       // Remove leading/trailing whitespace
+       processedPath.erase(0, processedPath.find_first_not_of(" \t\n\r"));
+       processedPath.erase(processedPath.find_last_not_of(" \t\n\r") + 1);
+       
+       // Remove quotes and special characters
+       processedPath.erase(remove(processedPath.begin(), processedPath.end(), '\''), processedPath.end());
+       processedPath.erase(remove(processedPath.begin(), processedPath.end(), '\"'), processedPath.end());
+       processedPath.erase(remove(processedPath.begin(), processedPath.end(), '&'), processedPath.end());
+       
+       // Replace backslashes with forward slashes
+       replace(processedPath.begin(), processedPath.end(), '\\', '/');
+       
+       return processedPath;
+   }
+    bool openFile(const string& filePath) const {
+       #ifdef _WIN32
+           string command = "start \"\" \"" + filePath + "\"";
+       #elif __APPLE__
+           string command = "open \"" + filePath + "\"";
+       #else
+           string command = "xdg-open \"" + filePath + "\"";
+       #endif
+       return system(command.c_str()) == 0;
+   }
 
 public:
     Teacher(string username, string password) {
@@ -168,129 +196,134 @@ public:
         cout << "Assignment added successfully!" << endl;
     }
 
-void gradeAssignment() {
-    try {
-        // First, get the courses this teacher teaches
-        vector<string> teacherCourses;
-        ifstream courseFile("../course.csv");
-        if (!courseFile.is_open()) {
-            cout << "Error: Unable to open course file!" << endl;
-            return;
-        }
-
-        string line;
-        while (getline(courseFile, line)) {
-            vector<string> courseDetails = split(line, ',');
-            if (courseDetails.size() >= 2 && courseDetails[1] == username) {
-                teacherCourses.push_back(courseDetails[0]);
-            }
-        }
-        courseFile.close();
-
-        if (teacherCourses.empty()) {
-            cout << "You are not assigned to any courses!" << endl;
-            return;
-        }
-
-        // Get all submissions that need grading
-        vector<vector<string>> pendingSubmissions;
-        ifstream submissionFile("../submissions.csv");
-        if (!submissionFile.is_open()) {
-            cout << "Error: Unable to open submissions file!" << endl;
-            return;
-        }
-
-        while (getline(submissionFile, line)) {
-            vector<string> submission = split(line, ',');
-            if (submission.size() < 4) continue; // Skip invalid lines
-
-            // Check if submission is for teacher's course
-            if (find(teacherCourses.begin(), teacherCourses.end(), submission[1]) != teacherCourses.end()) {
-                // Check if this submission has already been graded
-                bool alreadyGraded = false;
-                ifstream gradeCheck("../grades.csv");
-                string gradeLine;
-                
-                while (getline(gradeCheck, gradeLine)) {
-                    vector<string> gradeDetails = split(gradeLine, ',');
-                    if (gradeDetails.size() < 4) continue; // Skip invalid lines
-                    
-                    if (gradeDetails[0] == submission[1] && // course name
-                        gradeDetails[1] == submission[2] && // assignment name
-                        gradeDetails[2] == submission[0]) { // student name
-                        alreadyGraded = true;
-                        break;
-                    }
-                }
-                gradeCheck.close();
-
-                if (!alreadyGraded) {
-                    pendingSubmissions.push_back(submission);
-                }
-            }
-        }
-        submissionFile.close();
-
-        if (pendingSubmissions.empty()) {
-            cout << "No pending submissions to grade!" << endl;
-            return;
-        }
-
-        // Display pending submissions
-        cout << "\nPending Submissions:" << endl;
-        cout << "-------------------" << endl;
-        for (size_t i = 0; i < pendingSubmissions.size(); ++i) {
-            cout << i + 1 << ". Student: " << pendingSubmissions[i][0]
-                 << ", Course: " << pendingSubmissions[i][1]
-                 << ", Assignment: " << pendingSubmissions[i][2]
-                 << ", File: " << pendingSubmissions[i][3] << endl;
-        }
-
-        // Get teacher's choice
-        int choice;
-        cout << "\nSelect submission to grade (Enter number): ";
-        cin >> choice;
-
-        if (choice < 1 || choice > static_cast<int>(pendingSubmissions.size())) {
-            cout << "Invalid selection!" << endl;
-            return;
-        }
-
-        vector<string>& selectedSubmission = pendingSubmissions[choice - 1];
-        
-        // Get grade
-        int grade;
-        cout << "\nViewing submission for student: " << selectedSubmission[0] 
-             << "\nCourse: " << selectedSubmission[1]
-             << "\nAssignment: " << selectedSubmission[2]
-             << "\nSubmitted file: " << selectedSubmission[3] << endl;
-        
-        cout << "\nEnter grade (0-100): ";
-        cin >> grade;
-
-        if (grade < 0 || grade > 100) {
-            cout << "Invalid grade. Must be between 0 and 100!" << endl;
-            return;
-        }
-
-        // Save grade
-        ofstream gradeFile("../grades.csv", ios::app);
-        if (!gradeFile.is_open()) {
-            cout << "Error: Unable to open grades file!" << endl;
-            return;
-        }
-
-        gradeFile << selectedSubmission[1] << "," // course
-                 << selectedSubmission[2] << "," // assignment
-                 << selectedSubmission[0] << "," // student
-                 << grade << endl;
-        gradeFile.close();
-
-        cout << "Grade recorded successfully!" << endl;
-    } catch (const exception& e) {
-            cout << "An error occurred: " << e.what() << endl;
-        }
-    }
+    void gradeAssignment() {
+       try {
+           // Get teacher's courses
+           vector<string> teacherCourses;
+           ifstream courseFile("../course.csv");
+           if (!courseFile.is_open()) {
+               throw runtime_error("Unable to open course file!");
+           }
+            string line;
+           while (getline(courseFile, line)) {
+               vector<string> courseDetails = split(line, ',');
+               if (courseDetails.size() >= 2 && courseDetails[1] == username) {
+                   teacherCourses.push_back(courseDetails[0]);
+               }
+           }
+           courseFile.close();
+            if (teacherCourses.empty()) {
+               cout << "You are not assigned to any courses!" << endl;
+               return;
+           }
+            // Get pending submissions
+           vector<vector<string>> pendingSubmissions;
+           ifstream submissionFile("../submissions.csv");
+           if (!submissionFile.is_open()) {
+               throw runtime_error("Unable to open submissions file!");
+           }
+            while (getline(submissionFile, line)) {
+               vector<string> submission = split(line, ',');
+               if (submission.size() < 4) continue;
+                // Check if submission is for teacher's course
+               if (find(teacherCourses.begin(), teacherCourses.end(), submission[1]) != teacherCourses.end()) {
+                   // Check if already graded
+                   bool alreadyGraded = false;
+                   ifstream gradeCheck("../grades.csv");
+                   string gradeLine;
+                   
+                   while (getline(gradeCheck, gradeLine)) {
+                       vector<string> gradeDetails = split(gradeLine, ',');
+                       if (gradeDetails.size() >= 4 && 
+                           gradeDetails[0] == submission[1] && 
+                           gradeDetails[1] == submission[2] && 
+                           gradeDetails[2] == submission[0]) {
+                           alreadyGraded = true;
+                           break;
+                       }
+                   }
+                   gradeCheck.close();
+                    if (!alreadyGraded) {
+                       pendingSubmissions.push_back(submission);
+                   }
+               }
+           }
+           submissionFile.close();
+            if (pendingSubmissions.empty()) {
+               cout << "No pending submissions to grade!" << endl;
+               return;
+           }
+            // Display pending submissions
+           cout << "\nPending Submissions:" << endl;
+           cout << "-------------------" << endl;
+           for (size_t i = 0; i < pendingSubmissions.size(); ++i) {
+               cout << i + 1 << ". Student: " << pendingSubmissions[i][0]
+                    << ", Course: " << pendingSubmissions[i][1]
+                    << ", Assignment: " << pendingSubmissions[i][2]
+                    << ", Submission: " << pendingSubmissions[i][3] << endl;
+           }
+            // Get submission selection
+           int choice;
+           cout << "\nSelect submission to grade (Enter number): ";
+           cin >> choice;
+            if (choice < 1 || choice > static_cast<int>(pendingSubmissions.size())) {
+               cout << "Invalid selection!" << endl;
+               return;
+           }
+            vector<string>& selectedSubmission = pendingSubmissions[choice - 1];
+           
+           // Display submission details
+           cout << "\nViewing submission for student: " << selectedSubmission[0] 
+                << "\nCourse: " << selectedSubmission[1]
+                << "\nAssignment: " << selectedSubmission[2]
+                << "\nSubmitted file/link: " << selectedSubmission[3] << endl;
+            // Process and handle submission
+           string submission = processFilePath(selectedSubmission[3]);
+           bool isLink = submission.find("http://") == 0 || submission.find("https://") == 0;
+            cout << "\nThis is a " << (isLink ? "link" : "file") << " submission. Would you like to:" << endl;
+           cout << "1. Open " << (isLink ? "in browser" : "file") << endl;
+           cout << "2. Continue to grading" << endl;
+           cout << "Enter choice: ";
+           
+           int viewChoice;
+           cin >> viewChoice;
+           
+           if (viewChoice == 1) {
+               if (!openFile(submission)) {
+                   cout << "Error: Could not open the " << (isLink ? "link" : "file") << "." << endl;
+                   cout << "Please check if the " << (isLink ? "link is valid" : "file exists and you have permission to access it") << "." << endl;
+               }
+               
+               if (!isLink) {
+                   cout << "\nPress Enter when you're ready to continue with grading...";
+                   cin.ignore();
+                   cin.get();
+               }
+           }
+            // Grade submission
+           int grade;
+           cout << "\nEnter grade (0-100): ";
+           cin >> grade;
+            while (grade < 0 || grade > 100) {
+               cout << "Invalid grade. Grade must be between 0 and 100." << endl;
+               cout << "Enter grade (0-100): ";
+               cin >> grade;
+           }
+            // Save grade
+           ofstream gradeFile("../grades.csv", ios::app);
+           if (!gradeFile.is_open()) {
+               throw runtime_error("Unable to open grades file!");
+           }
+            gradeFile << selectedSubmission[1] << "," // course
+                    << selectedSubmission[2] << "," // assignment
+                    << selectedSubmission[0] << "," // student
+                    << grade << endl;
+           gradeFile.close();
+            cout << "Grade recorded successfully!" << endl;
+        } catch (const exception& e) {
+           cout << "An error occurred: " << e.what() << endl;
+       }
+   }
 
     void manageAssignments() {
         int choice;
