@@ -379,64 +379,39 @@ void gradeAssignment() {
     }
 
         void changePassword() {
-        string newPassword;
-        bool validPassword = false;
-
-        do {
-            cout << "\nEnter new password (must be 6 characters, can be letters or numbers): ";
-            cin >> newPassword;
-
-            // Check if password is exactly 6 characters
-            if (newPassword.length() != 6) {
-                cout << "Password must be exactly 6 characters long!" << endl;
-                continue;
-            }
-
-            // Check if password contains only letters and numbers
-            bool validChars = true;
-            for (char c : newPassword) {
-                if (!isalnum(c)) {  // checks if character is letter or number
-                    validChars = false;
-                    break;
-                }
-            }
-
-            if (!validChars) {
-                cout << "Password can only contain letters and numbers!" << endl;
-                continue;
-            }
-
-            validPassword = true;
-
-        } while (!validPassword);
-
-        // Read all teachers from file
-        vector<string> allTeachers;
-        ifstream readFile("../teacher.csv");
-        string line;
-        
-        while (getline(readFile, line)) {
-            vector<string> teacherData = split(line, ',');
-            if (teacherData[0] == username) {
-                // Update this teacher's password
-                allTeachers.push_back(username + "," + newPassword);
-            } else {
-                allTeachers.push_back(line);
-            }
-        }
-        readFile.close();
-
-        // Write all teachers back to file
-        ofstream writeFile("../teacher.csv");
-        for (const string& teacherLine : allTeachers) {
-            writeFile << teacherLine << endl;
-        }
-        writeFile.close();
-
-        // Update the password in current object
-        this->password = newPassword;
-        cout << "Password changed successfully!" << endl;
-    }
+    string newPassword;
+   cout << "\nEnter new password (must be at least 6 characters): ";
+   cin >> newPassword;
+    while (newPassword.length() < 6) {
+       cout << "Password must be at least 6 characters long!" << endl;
+       cout << "Enter new password: ";
+       cin >> newPassword;
+   }
+    // Read all teachers from file
+   vector<string> allTeachers;
+   ifstream readFile("../teacher.csv");
+   string line;
+   
+   while (getline(readFile, line)) {
+       vector<string> teacherData = split(line, ',');
+       if (teacherData[0] == username) {
+           // Update this teacher's password
+           allTeachers.push_back(username + "," + newPassword);
+       } else {
+           allTeachers.push_back(line);
+       }
+   }
+   readFile.close();
+    // Write all teachers back to file
+   ofstream writeFile("../teacher.csv");
+   for (const string& teacherLine : allTeachers) {
+       writeFile << teacherLine << endl;
+   }
+   writeFile.close();
+    // Update the password in current object
+   this->password = newPassword;
+   cout << "Password changed successfully!" << endl;
+}
 
     void displayInformation() {
         int choice;
