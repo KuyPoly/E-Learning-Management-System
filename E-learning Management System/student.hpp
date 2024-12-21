@@ -159,102 +159,167 @@ public:
         file.close();
     }
 
-void submitAssignment() const {
-    ifstream assignmentsFile("../assignments.csv");
 
-    if (!assignmentsFile.is_open()) {
-        cout << "Error: Could not open file assignments.csv" << endl;
-        return;
-    }
+    void submitAssignment() const {
+        ifstream assignmentsFile("../assignments.csv");
 
-    string line;
-    vector<pair<string, string>> coursesAssignments;
-
-    while (getline(assignmentsFile, line)) {
-        vector<string> data = split(line, ',');
-        if (data.size() >= 2) {
-            string course_id = data[0];
-            string assignment_name = data[1];
-            coursesAssignments.push_back({course_id, assignment_name});
-        }
-    }
-
-    assignmentsFile.close();
-
-    cout << "Available Assignments:" << endl;
-    cout << "---------------------------------------------" << endl;
-    cout << "No | Course ID | Assignment Name" << endl;
-    cout << "---------------------------------------------" << endl;
-
-    for (size_t i = 0; i < coursesAssignments.size(); ++i) {
-        cout << i + 1 << " | " << coursesAssignments[i].first << " | " << coursesAssignments[i].second << endl;
-    }
-
-    int choice;
-    cout << "Enter the number of the assignment to submit: ";
-    cin >> choice;
-    if (choice < 1 || choice > coursesAssignments.size()) {
-        cout << "Invalid choice!" << endl;
-        return;
-    }
-
-    string selected_course = coursesAssignments[choice - 1].first;
-    string selected_assignment = coursesAssignments[choice - 1].second;
-
-    string submission;
-    while (true) {
-        cout << "Submitting for assignment: " << selected_assignment << endl;
-        cout << "Enter a file path or a link to submit (or type 'exit' to quit): ";
-
-        cin.clear();
-        cin.sync();
-        getline(cin, submission);
-
-        // Trim whitespace
-        submission.erase(0, submission.find_first_not_of(" \t\n\r"));
-        submission.erase(submission.find_last_not_of(" \t\n\r") + 1);
-
-        if (submission == "exit") {
-            cout << "Exiting the process." << endl;
+        if (!assignmentsFile.is_open()) {
+            cout << "Error: Could not open file assignments.csv" << endl;
             return;
         }
 
-        // Validate submission as a file path or link
-        if (submission.empty()) {
-            cout << "Submission cannot be empty." << endl;
-            cout<<"---------------------||------------------------"<<endl;
-            cout<<"Please try again!"<<endl;
-        } else if (submission.find("http://") == 0 || submission.find("https://") == 0) {
-            break; // Valid link
-        } else if (submission.find(":\\") != string::npos || submission.find("/") != string::npos) {
-            break; // Valid file path
-        } else {
-            cout << "Invalid!" << endl;
-            cout<<"---------------------||------------------------"<<endl;
-            cout<<"Please try again!"<<endl;
+        string line;
+        vector<pair<string, string>> coursesAssignments;
+
+        while (getline(assignmentsFile, line)) {
+            vector<string> data = split(line, ',');
+            if (data.size() >= 2) {
+                string course_id = data[0];
+                string assignment_name = data[1];
+                coursesAssignments.push_back({course_id, assignment_name});
+            }
         }
+
+        assignmentsFile.close();
+
+        cout << "Available Assignments:" << endl;
+        cout << "---------------------------------------------" << endl;
+        cout << "No | Course ID | Assignment Name" << endl;
+        cout << "---------------------------------------------" << endl;
+
+        for (size_t i = 0; i < coursesAssignments.size(); ++i) {
+            cout << i + 1 << " | " << coursesAssignments[i].first << " | " << coursesAssignments[i].second << endl;
+        }
+
+        int choice;
+        cout << "Enter the number of the assignment to submit: ";
+        cin >> choice;
+        if (choice < 1 || choice > coursesAssignments.size()) {
+            cout << "Invalid choice!" << endl;
+            return;
+        }
+
+        string selected_course = coursesAssignments[choice - 1].first;
+        string selected_assignment = coursesAssignments[choice - 1].second;
+
+        string submission;
+        while (true) {
+            cout << "Submitting for assignment: " << selected_assignment << endl;
+            cout << "Enter a file path or a link to submit (or type 'exit' to quit): ";
+
+            cin.clear();
+            cin.sync();
+            getline(cin, submission);
+
+            // Trim whitespace
+            submission.erase(0, submission.find_first_not_of(" \t\n\r"));
+            submission.erase(submission.find_last_not_of(" \t\n\r") + 1);
+
+            if (submission == "exit") {
+                cout << "Exiting the process." << endl;
+                return;
+            }
+
+            // Validate submission as a file path or link
+            if (submission.empty()) {
+                cout << "Submission cannot be empty." << endl;
+                cout<<"---------------------||------------------------"<<endl;
+                cout<<"Please try again!"<<endl;
+            } else if (submission.find("http://") == 0 || submission.find("https://") == 0) {
+                break; // Valid link
+            } else if (submission.find(":\\") != string::npos || submission.find("/") != string::npos) {
+                break; // Valid file path
+            } else {
+                cout << "Invalid!" << endl;
+                cout<<"---------------------||------------------------"<<endl;
+                cout<<"Please try again!"<<endl;
+            }
+        }
+
+        ofstream submissionsFile("../submissions.csv", ios::app);
+
+        if (!submissionsFile.is_open()) {
+            cout << "Error: Could not open file submissions.csv" << endl;
+            return;
+        }
+
+        // Check if the submission is a link or file
+        bool isLink = submission.find("http://") == 0 || submission.find("https://") == 0;
+
+        if (isLink) {
+            submissionsFile << username << "," << selected_course << "," << selected_assignment<<"," << submission << endl;
+            cout << "Link submitted successfully!" << endl;
+        } else {
+            submissionsFile << username << "," << selected_course << "," << selected_assignment<<"," << submission << endl;
+            cout << "File submitted successfully!" << endl;
+        }
+
+        submissionsFile.close();
     }
 
-    ofstream submissionsFile("../submissions.csv", ios::app);
+    void deleteAssignment() {
+        ifstream assignmentsFile("../assignments.csv");
 
-    if (!submissionsFile.is_open()) {
-        cout << "Error: Could not open file submissions.csv" << endl;
-        return;
+        if (!assignmentsFile.is_open()) {
+            cout << "Error: Could not open file assignments.csv" << endl;
+            return;
+        }
+
+        vector<pair<string, string>> assignments;
+        string line;
+
+        // Read all assignments into a vector
+        while (getline(assignmentsFile, line)) {
+            vector<string> data = split(line, ',');
+            if (data.size() >= 2) {
+                assignments.emplace_back(data[0], data[1]);
+            }
+        }
+
+        assignmentsFile.close();
+
+        // Check if there are assignments to delete
+        if (assignments.empty()) {
+            cout << "No assignments available to delete!" << endl;
+            return;
+        }
+
+        cout << "Available Assignments:" << endl;
+        cout << "---------------------------------------------" << endl;
+        cout << "No | Course ID | Assignment Name" << endl;
+        cout << "---------------------------------------------" << endl;
+
+        for (size_t i = 0; i < assignments.size(); ++i) {
+            cout << i + 1 << " | " << assignments[i].first << " | " << assignments[i].second << endl;
+        }
+
+        int choice;
+        cout << "Enter the number of the assignment to delete: ";
+        cin >> choice;
+
+        if (choice < 1 || choice > assignments.size()) {
+            cout << "Invalid choice!" << endl;
+            return;
+        }
+
+        // Remove the selected assignment
+        assignments.erase(assignments.begin() + (choice - 1));
+
+        // Write the updated list back to the file
+        ofstream assignmentsOutFile("../assignments.csv");
+
+        if (!assignmentsOutFile.is_open()) {
+            cout << "Error: Could not open file assignments.csv for writing!" << endl;
+            return;
+        }
+
+        for (const auto& assignment : assignments) {
+            assignmentsOutFile << assignment.first << "," << assignment.second << endl;
+        }
+
+        assignmentsOutFile.close();
+        cout << "Assignment deleted successfully!" << endl;
     }
-
-    // Check if the submission is a link or file
-    bool isLink = submission.find("http://") == 0 || submission.find("https://") == 0;
-
-    if (isLink) {
-        submissionsFile << username << "," << selected_course << "," << selected_assignment<<"," << submission << endl;
-        cout << "Link submitted successfully!" << endl;
-    } else {
-        submissionsFile << username << "," << selected_course << "," << selected_assignment<<"," << submission << endl;
-        cout << "File submitted successfully!" << endl;
-    }
-
-    submissionsFile.close();
-}
 
         void viewGrade() const {
         ifstream gradesFile("../grades.csv");
@@ -298,7 +363,8 @@ void submitAssignment() const {
         }
         cout << "------------------------------------------------------" << endl;
     }
-        void viewProgress() const {
+
+    void viewProgress() const {
         ifstream gradesFile("../grades.csv");
         if (!gradesFile.is_open()) {
             cout << "Error: Could not open grades.csv file!" << endl;
@@ -391,7 +457,7 @@ void submitAssignment() const {
 
         progressFile.close();
     }
-        void displayInformation() const {
+    void displayInformation() const {
         ifstream studentsFile("../student.csv");
         if (!studentsFile.is_open()) {
             cout << "Error: Could not open students.csv file!" << endl;
@@ -457,8 +523,9 @@ void submitAssignment() const {
         cout << "\n=== Assignment Management ===\n";
         cout << "1. View Assignments\n";
         cout << "2. Submit Assignment\n";
-        cout << "3. View Grades\n";
-        cout << "4. Back to Main Menu\n";
+        cout << "3. Delete Assignment\n";
+        cout << "4. View Grades\n";
+        cout << "5. Back to Main Menu\n";
         cout << "==================\n";
         cout << "Enter your choice: ";
         cin >> choice;
@@ -471,9 +538,12 @@ void submitAssignment() const {
                 submitAssignment();
                 break;
             case 3:
-                viewGrade();
+                deleteAssignment();
                 break;
             case 4:
+                viewGrade();
+                break;
+            case 5:
                 cout << "Returning to main menu...\n";
                 break;
             default:
