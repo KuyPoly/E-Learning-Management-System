@@ -129,6 +129,65 @@ public:
         } while (!exit_loop);
     }
 
+   void viewLessons() {
+        ifstream lessonFile("../lesson.csv");
+        if (!lessonFile.is_open()) {
+            cout << "Error: Unable to open lesson file.\n";
+            return;
+        }
+
+        vector<vector<string>> lessons;
+        string line;
+
+        // Read all lessons from the file
+        while (getline(lessonFile, line)) {
+            vector<string> data = split(line, ',');
+            if (data.size() >= 3) {
+                lessons.push_back(data);
+            }
+        }
+
+        lessonFile.close();
+
+        // Check if lessons are available
+        if (lessons.empty()) {
+            cout << "No lessons found in the file.\n";
+            return;
+        }
+
+        // Display available lessons
+        cout << "Available Lessons:\n";
+        cout << "-------------------------------------------------------------\n";
+        cout << "No | Lesson Title         | Course           | Details\n";
+        cout << "-------------------------------------------------------------\n";
+
+        for (size_t i = 0; i < lessons.size(); ++i) {
+            cout << i + 1 << "  | " << lessons[i][0] << "  | " << lessons[i][1] << "  | " << lessons[i][2] << "\n";
+        }
+
+        cout << "-------------------------------------------------------------\n";
+
+        int choice;
+        cout << "Enter the number of the lesson to view more details (or 0 to exit): ";
+        cin >> choice;
+
+        if (choice == 0) {
+            cout << "Exiting lesson view.\n";
+            return;
+        } else if (choice < 1 || choice > lessons.size()) {
+            cout << "Invalid choice.\n";
+            return;
+        }
+
+        // Display detailed lesson content
+        cout << "\nLesson Details:\n";
+        cout << "-------------------------------------------------------------\n";
+        cout << "Lesson Title: " << lessons[choice - 1][0] << "\n";
+        cout << "Course      : " << lessons[choice - 1][1] << "\n";
+        cout << "Details     : " << lessons[choice - 1][2] << "\n";
+        cout << "-------------------------------------------------------------\n";
+    }
+
     void viewAssignments() const {
         ifstream file("../assignments.csv");
 
@@ -523,29 +582,33 @@ public:
     int choice;
     do {
         cout << "\n=== Assignment Management ===\n";
-        cout << "1. View Assignments\n";
-        cout << "2. Submit Assignment\n";
-        cout << "3. Delete Submissions\n";
-        cout << "4. View Grades\n";
-        cout << "5. Back to Main Menu\n";
+        cout << "1. View Lessons\n";
+        cout << "2. View Assignments\n";
+        cout << "3. Submit Assignment\n";
+        cout << "4. Delete Submissions\n";
+        cout << "5. View Grades\n";
+        cout << "6. Back to Main Menu\n";
         cout << "==================\n";
         cout << "Enter your choice: ";
         cin >> choice;
 
         switch (choice) {
             case 1:
-                viewAssignments();
+                viewLessons();
                 break;
             case 2:
-                submitAssignment();
+                viewAssignments();
                 break;
             case 3:
-                deleteSubmission();
+                submitAssignment();
                 break;
             case 4:
-                viewGrade();
+                deleteSubmission();
                 break;
             case 5:
+                viewGrade();
+                break;
+            case 6:
                 cout << "Returning to main menu...\n";
                 break;
             default:
