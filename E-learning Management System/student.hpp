@@ -141,11 +141,14 @@ public:
 
         // Read all lessons from the file
         while (getline(lessonFile, line)) {
+            cout << "Lesson: " << line << "\n";
             vector<string> data = split(line, ',');
             if (data.size() >= 3) {
                 lessons.push_back(data);
-            }
-        }
+            } //else {
+            //cout << "Invalid lesson format: " << line << "\n";//
+       // } //
+    }
 
         lessonFile.close();
 

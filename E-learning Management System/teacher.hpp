@@ -139,7 +139,7 @@ public:
         return;
     }
 
-    cout << "Saving lesson to file: " << lesson.title << "," << course << "," << lesson.details << "\n"; // Debugging statement
+    cout << "Saving lesson to file: " << lesson.title << "," << course << "," << lesson.details << "\n"; 
     lessonFile << lesson.title << "," << course << "," << lesson.details << "\n";
     lessonFile.close();
     }
@@ -153,7 +153,7 @@ public:
     if (it != lessons.end()) {
         lessons.erase(it, lessons.end());
         cout << "Lesson deleted successfully: " << lessonTitle << "\n";
-        deleteLessonFromFile(lessonTitle); // Call the method to delete from file
+        deleteLessonFromFile(lessonTitle); 
     } else {
         cout << "Lesson not found: " << lessonTitle << "\n";
     }
@@ -173,6 +173,7 @@ public:
             lines.push_back(line);
         }
     }
+
     lessonFile.close();
 
     ofstream outFile("../lesson.csv");
@@ -188,24 +189,44 @@ public:
 }
 
     void displayAllLessons() const {
-        ifstream lessonFile("../lesson.csv");
-            if (!lessonFile.is_open()) {
-                cout << "Error: Unable to open lesson file.\n";
-                return;
-            }
+    ifstream courseFile("../course.csv");
+    if (!courseFile.is_open()) {
+        cout << "Error: Unable to open course file.\n";
+        return;
+    }
 
-        string line;
-        while (getline(lessonFile, line)) {
-            cout << "Lessons: " << line << "\n"; // Debugging statement
-            vector<string> lessonDetails = splitLine(line, ',');
-            if (lessonDetails.size() >= 3) {
-                cout << "Title: " << lessonDetails[0] << "\n";
-                cout << "Course: " << lessonDetails[1] << "\n";
-                cout << "Details: " << lessonDetails[2] << "\n";
-                cout << "\n";
-            }
+    map<string, string> courseDetails;
+    string courseLine;
+    while (getline(courseFile, courseLine)) {
+        vector<string> courseData = splitLine(courseLine, ',');
+        if (courseData.size() >= 2) {
+            courseDetails[courseData[0]] = courseData[1];
         }
-            lessonFile.close();
+    }
+    
+    courseFile.close();
+
+    ifstream lessonFile("../lesson.csv");
+    if (!lessonFile.is_open()) {
+        cout << "Error: Unable to open lesson file.\n";
+        return;
+    }
+
+    string line;
+    while (getline(lessonFile, line)) {
+        cout << "Lessons: " << line << "\n"; 
+        vector<string> lessonDetails = splitLine(line, ',');
+        if (lessonDetails.size() >= 3) {
+            cout << "Title: " << lessonDetails[0] << "\n";
+            cout << "Course: " << lessonDetails[1] << "\n";
+            cout << "Details: " << lessonDetails[2] << "\n";
+            if (courseDetails.find(lessonDetails[1]) != courseDetails.end()) {
+                cout << "Course Details: " << courseDetails[lessonDetails[1]] << "\n";
+            }
+            cout << "\n";
+        }
+    }
+    lessonFile.close();
     }
 
 
