@@ -84,7 +84,7 @@ private:
     vector<Lesson> lessons;
 
 public:
-    string selectCourse() {
+    string selectCourse(const string& username) {
         ifstream courseFile("../course.csv");
         if (!courseFile.is_open()) {
             cout << "Error: Unable to open course file.\n";
@@ -95,14 +95,14 @@ public:
         string line;
         while (getline(courseFile, line)) {
             vector<string> courseData = splitLine(line, ',');
-            if (!courseData.empty()) {
+            if (courseData.size() >= 2 && courseData[1] == username) {
                 courses.push_back(courseData[0]);
             }
         }
         courseFile.close();
 
         if (courses.empty()) {
-            cout << "No courses available.\n";
+            cout << "No courses available for you.\n";
             return "";
         }
 
@@ -115,7 +115,7 @@ public:
         cout << "Select a course by number: ";
         cin >> choice;
 
-        if (choice < 1 || choice > courses.size()) {
+        if (choice < 1 || choice > static_cast<int>(courses.size())) {
             cout << "Invalid choice.\n";
             return "";
         }
@@ -395,9 +395,6 @@ public:
         this->password = password;
     }
 
-        string selectCourse() {
-        return lessonManager.selectCourse();
-    }
 
     void addLesson(const Lesson& newLesson, const string& course) {
         lessonManager.addLesson(newLesson, course);
@@ -950,7 +947,7 @@ public:
 
             switch (choice) {
                 case 1: {
-                    string course = selectCourse();
+                    string course = lessonManager.selectCourse(username);
                     if (course.empty()) {
                         cout << "No course selected. Returning to menu.\n";
                         break;

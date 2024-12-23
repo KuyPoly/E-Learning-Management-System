@@ -59,6 +59,7 @@
   "files.associations": {
     "iostream": "cpp",
     "map": "cpp",
-    "fstream": "cpp"
+    "fstream": "cpp",
+    "iosfwd": "cpp"
   }
 }
