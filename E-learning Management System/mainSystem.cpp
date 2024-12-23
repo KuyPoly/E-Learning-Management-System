@@ -95,6 +95,7 @@ int main() {
             cin >> username;
             cout << "Enter password: ";
             cin >> password;
+            system("cls");
 
             ifstream file(filename);
             string line;
@@ -127,7 +128,8 @@ int main() {
             displayMenu(role);
             int choice;
             cin >> choice;
-
+            system("cls");
+            
             if (role == "Admin") {
                 Admin admin;
                 switch (choice) {

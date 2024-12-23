@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <set>
+#include <cstdlib> 
 #include <utility>
 #include "../utils/file.h"
 #include "../utils/validate.h"
@@ -187,9 +188,11 @@ public:
         int choice;
         cout << "Enter the number of the lesson to view more details (or 0 to exit): ";
         cin >> choice;
+        system("cls");
 
         if (choice == 0) {
             cout << "Exiting lesson view.\n";
+            system("cls");
             return;
         } else if (choice < 1 || choice > lessons.size()) {
             cout << "Invalid choice.\n";
@@ -203,6 +206,8 @@ public:
         cout << "Course      : " << lessons[choice - 1][1] << "\n";
         cout << "Details     : " << lessons[choice - 1][2] << "\n";
         cout << "-------------------------------------------------------------\n";
+        system("pause");
+        system("cls");
     }
 
 void viewAssignments(const string& username) const {
@@ -302,15 +307,18 @@ void viewAssignments(const string& username) const {
 
             string resource = selectedAssignment[2];
             bool isLink = resource.find("http://") == 0 || resource.find("https://") == 0;
-
             cout << "\nOpening " << (isLink ? "link" : "file") << ": " << resource << endl;
-            if (!openFile(resource)) {
-                cout << "Error: Could not open the " << (isLink ? "link" : "file") << "." << endl;
-                cout << "Please check if the " << (isLink ? "link is valid" : "file exists and you have permission to access it") << "." << endl;
-            }
+            
+
+            // if (!openFile(resource)) {
+            //     cout << "Error: Could not open the " << (isLink ? "link" : "file") << "." << endl;
+            //     cout << "Please check if the " << (isLink ? "link is valid" : "file exists and you have permission to access it") << "." << endl;
+            // }
+            system("pause");
+            system("cls");
         }
     }
-    
+
     void submitAssignment(const string& username) const {
         ifstream assignmentsFile("../assignments.csv");
         ifstream submissionsFile("../submissions.csv");
@@ -720,6 +728,7 @@ void viewAssignments(const string& username) const {
         cout << "==================\n";
         cout << "Enter your choice: ";
         cin >> choice;
+        system("cls");
 
         switch (choice) {
             case 1:
@@ -756,7 +765,8 @@ void manageProfile() {
         cout << "==================\n";
         cout << "Enter your choice: ";
         cin >> choice;
-
+        system("cls");
+        
         switch (choice) {
             case 1:
                 displayInformation();
@@ -783,6 +793,7 @@ void viewAcademicProgress() {
         cout << "==================\n";
         cout << "Enter your choice: ";
         cin >> choice;
+        system("cls");
 
         switch (choice) {
             case 1:
