@@ -19,8 +19,21 @@ public:
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             getline(cin, fullName);
 
+            if (fullName.empty()) {
+                cout << "Error: Name cannot be empty!" << endl;
+                if (exitPrompt()) return;
+                continue;
+            }
+
             cout << "Enter role (Admin, Teacher, or Student): ";
             getline(cin, role);
+
+            if (role.empty()) {
+                cout << "Error: Role cannot be empty!" << endl;
+                if (exitPrompt()) return;
+                continue;
+            }
+
 
             cout << "Enter password: ";
             getline(cin, password);
@@ -30,6 +43,8 @@ public:
                 if (exitPrompt()) return;
                 continue;
             }
+
+
 
             string filePath;
             if (role == "Admin") filePath = "../admin.csv";
