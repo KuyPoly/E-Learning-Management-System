@@ -194,7 +194,8 @@ public:
         int choice;
         cout << "Enter the number of the lesson to view more details (or 0 to exit): ";
         cin >> choice;
-
+        system("cls");
+        
         if (choice == 0) {
             cout << "Exiting lesson view.\n";
             system("cls");

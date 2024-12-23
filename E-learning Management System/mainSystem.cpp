@@ -13,11 +13,11 @@ using namespace std;
 // Main Menu for Role Selection
 void displayMainMenu() {
     cout << "\n=== Main Menu ===\n";
-    cout << "1. Admin\n";
-    cout << "2. Teacher\n";
-    cout << "3. Student\n";
-    cout << "0. Exit\n";
-    cout << "==================\n";
+    cout << " 1. Admin\n";
+    cout << " 2. Teacher\n";
+    cout << " 3. Student\n";
+    cout << " 0. Exit\n";
+    cout << "=================\n";
     cout << "Enter your choice: ";
 }
 
@@ -58,13 +58,14 @@ int main() {
     string username, password, role;
     bool stayLoggedIn = true;
 
-    cout << "Welcome to the E-learning Management System" << endl;
+    cout << "\n------------------------ Welcome to the E-learning Management System ------------------------ " << endl;
 
     while (stayLoggedIn) {
         // Display main menu for role selection
         displayMainMenu();
         int roleChoice;
         cin >> roleChoice;
+        system("cls");
 
         // Exit the program if the user selects option 0
         if (roleChoice == 0) {
@@ -91,11 +92,11 @@ int main() {
         // Authentication
         bool authenticated = false;
         do {
+            cout << "\n------------login--------------"<<endl;
             cout << "Enter username: ";
             cin >> username;
             cout << "Enter password: ";
             cin >> password;
-            system("cls");
 
             ifstream file(filename);
             string line;
@@ -113,13 +114,15 @@ int main() {
                 cout << "Press 1 to try again or 2 to exit: ";
                 int choice;
                 cin >> choice;
+                system("cls");
+
                 if (choice == 2) {
                     cout << "Exiting..." << endl;
                     return 0;
                 }
             }
         } while (!authenticated);
-
+        system("cls");
         cout << "Login successful! Welcome, " << username << " (" << role << ")" << endl;
 
         // Role-specific menu loop
