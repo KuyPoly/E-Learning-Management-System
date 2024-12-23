@@ -150,7 +150,7 @@ public:
         } while (!exit_loop);
     }
 
-   void viewLessons() {
+    void viewLessons() {
         ifstream lessonFile("../lesson.csv");
         if (!lessonFile.is_open()) {
             cout << "Error: Unable to open lesson file.\n";
@@ -162,14 +162,13 @@ public:
 
         // Read all lessons from the file
         while (getline(lessonFile, line)) {
-            cout << "Lesson: " << line << "\n";
-            vector<string> data = split(line, ',');
-            if (data.size() >= 3) {
+            vector<string> data = split(line, ','); // Assuming a split function is available
+            if (data.size() >= 5) { // Ensure at least 5 columns (Title, Course, Content, Details, and one file)
                 lessons.push_back(data);
-            } //else {
-            //cout << "Invalid lesson format: " << line << "\n";//
-       // } //
-    }
+            } else {
+                cout << "Invalid lesson format: " << line << "\n";
+            }
+        }
 
         lessonFile.close();
 
@@ -181,24 +180,34 @@ public:
 
         // Display available lessons
         cout << "Available Lessons:\n";
-        cout << "-------------------------------------------------------------\n";
-        cout << "No | Lesson Title         | Course           | Details\n";
-        cout << "-------------------------------------------------------------\n";
+        cout << "------------------------------------------------------------------------------------\n";
+        cout << "No | Lesson Title    | Course      | Lesson Content     | Details      | File(s)\n";
+        cout << "------------------------------------------------------------------------------------\n";
 
         for (size_t i = 0; i < lessons.size(); ++i) {
-            cout << i + 1 << "  | " << lessons[i][0] << "  | " << lessons[i][1] << "  | " << lessons[i][2] << "\n";
+            cout << i + 1 << "  | " << lessons[i][0] << "     | " << lessons[i][1] << "     | " 
+                << lessons[i][2] << "    | " << lessons[i][3];
+
+            // Display the first file in the "File(s)" column
+            if (lessons[i].size() > 4) {
+                cout << "  | " << lessons[i][4]; // Display the first file
+                if (lessons[i].size() > 5) {
+                    cout << " (+" << (lessons[i].size() - 5) << " more)"; // Indicate additional files
+                }
+            } else {
+                cout << "  | None"; // No files available
+            }
+            cout << "\n";
         }
 
-        cout << "-------------------------------------------------------------\n";
+        cout << "------------------------------------------------------------------------------------\n";
 
         int choice;
         cout << "Enter the number of the lesson to view more details (or 0 to exit): ";
         cin >> choice;
-        system("cls");
-        
+
         if (choice == 0) {
             cout << "Exiting lesson view.\n";
-            system("cls");
             return;
         } else if (choice < 1 || choice > lessons.size()) {
             cout << "Invalid choice.\n";
@@ -207,18 +216,28 @@ public:
             return;
         }
 
-        // Display detailed lesson content
+        // Display detailed lesson information
+        const vector<string>& selectedLesson = lessons[choice - 1];
+        system("cls");
         cout << "\nLesson Details:\n";
-        cout << "-------------------------------------------------------------\n";
-        cout << "Lesson Title: " << lessons[choice - 1][0] << "\n";
-        cout << "Course      : " << lessons[choice - 1][1] << "\n";
-        cout << "Details     : " << lessons[choice - 1][2] << "\n";
+        cout << "--------------------------------------------------------------\n";
+        cout << "Lesson Title : " << selectedLesson[0] << "\n";
+        cout << "Course       : " << selectedLesson[1] << "\n";
+        cout << "Lesson Content: " << selectedLesson[2] << "\n";
+        cout << "Details      : " << selectedLesson[3] << "\n";
+
+        // Display the files starting from the 5th column
+        cout << "Files        :\n";
+        for (size_t i = 4; i < selectedLesson.size(); ++i) {
+            cout << "  - " << selectedLesson[i] << "\n";
+        }
+
         cout << "-------------------------------------------------------------\n";
         system("pause");
         system("cls");
     }
 
-void viewAssignments(const string& username) const {
+    void viewAssignments(const string& username) const {
         ifstream assignmentsFile("../assignments.csv");
         ifstream submissionsFile("../submissions.csv");
 
@@ -471,6 +490,7 @@ void viewAssignments(const string& username) const {
 
         submissionsFileOut.close();
     }
+
     void deleteSubmission() {
         ifstream submissionsFile("../submissions.csv"); // Open submissions file
 
@@ -541,8 +561,7 @@ void viewAssignments(const string& username) const {
         system("cls");
     }
 
-
-        void viewGrade() const {
+    void viewGrade() const {
         ifstream gradesFile("../grades.csv");
         if (!gradesFile.is_open()) {
             cout << "Error: Could not open grades.csv file!" << endl;
@@ -682,6 +701,7 @@ void viewAssignments(const string& username) const {
 
         progressFile.close();
     }
+    
     void displayInformation() const {
         ifstream studentsFile("../student.csv");
         if (!studentsFile.is_open()) {
