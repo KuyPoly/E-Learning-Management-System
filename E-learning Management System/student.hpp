@@ -12,6 +12,18 @@ private:
     string username;
     string password;
 
+        // Add these helper methods to the Student class private section
+    bool openFile(const string& filePath) const {
+        #ifdef _WIN32
+            string command = "start \"\" \"" + filePath + "\"";
+        #elif __APPLE__
+            string command = "open \"" + filePath + "\"";
+        #else
+            string command = "xdg-open \"" + filePath + "\"";
+        #endif
+        return system(command.c_str()) == 0;
+    }
+
 public:
     Student(const string& username, const string& password) : username(username), password(password) {}
 
@@ -194,64 +206,111 @@ public:
     }
 
 void viewAssignments(const string& username) const {
-    ifstream assignmentsFile("../assignments.csv");
-    ifstream submissionsFile("../submissions.csv");
+        ifstream assignmentsFile("../assignments.csv");
+        ifstream submissionsFile("../submissions.csv");
 
-    if (!assignmentsFile.is_open()) {
-        cout << "Could not open file assignments.csv" << endl;
-        return;
-    }
+        if (!assignmentsFile.is_open()) {
+            cout << "Could not open file assignments.csv" << endl;
+            return;
+        }
 
-    if (!submissionsFile.is_open()) {
-        cout << "Could not open file submissions.csv" << endl;
+        if (!submissionsFile.is_open()) {
+            cout << "Could not open file submissions.csv" << endl;
+            assignmentsFile.close();
+            return;
+        }
+
+        // Read submitted assignments for the given user into a set for quick lookup
+        set<pair<string, string>> submittedAssignments;
+        string line;
+        while (getline(submissionsFile, line)) {
+            vector<string> submissionData = split(line, ',');
+            if (submissionData.size() < 3) {
+                continue; // Skip invalid entries
+            }
+
+            string studentName = submissionData[0];
+            string courseId = submissionData[1];
+            string assignmentName = submissionData[2];
+
+            if (studentName == username) {
+                submittedAssignments.insert({courseId, assignmentName});
+            }
+        }
+
+        submissionsFile.close();
+
+        // Display assignments that are not submitted by the given user
+        cout << "Assignments List for " << username << ":" << endl;
+        cout << "--------------------------------------------" << endl;
+        cout << "No. | Course ID | Assignment | Resource" << endl;
+        cout << "--------------------------------------------" << endl;
+
+        vector<vector<string>> availableAssignments;
+        int counter = 1;
+
+        while (getline(assignmentsFile, line)) {
+            vector<string> assignmentData = split(line, ',');
+            if (assignmentData.size() < 2) {
+                continue; // Skip invalid entries
+            }
+
+            string courseId = assignmentData[0];
+            string assignmentName = assignmentData[1];
+            string resource = assignmentData.size() > 2 ? assignmentData[2] : "None";
+
+            if (submittedAssignments.find({courseId, assignmentName}) == submittedAssignments.end()) {
+                cout << counter << ". | " << courseId << " | " << assignmentName;
+                if (resource != "None") {
+                    cout << " | [Available]";
+                } else {
+                    cout << " | [None]";
+                }
+                cout << endl;
+                availableAssignments.push_back(assignmentData);
+                counter++;
+            }
+        }
+
         assignmentsFile.close();
-        return;
-    }
 
-    // Read submitted assignments for the given user into a set for quick lookup
-    set<pair<string, string>> submittedAssignments;
-    string line;
-    while (getline(submissionsFile, line)) {
-        vector<string> submissionData = split(line, ',');
-        if (submissionData.size() < 3) {
-            continue; // Skip invalid entries
+        if (availableAssignments.empty()) {
+            cout << "No pending assignments." << endl;
+            return;
         }
 
-        string studentName = submissionData[0];
-        string courseId = submissionData[1];
-        string assignmentName = submissionData[2];
+        cout << "--------------------------------------------" << endl;
+        cout << "Would you like to view an assignment resource? (y/n): ";
+        char choice;
+        cin >> choice;
 
-        if (studentName == username) {
-            submittedAssignments.insert({courseId, assignmentName});
-        }
-    }
+        if (choice == 'y' || choice == 'Y') {
+            cout << "Enter assignment number to view resource: ";
+            int assignmentChoice;
+            cin >> assignmentChoice;
 
-    submissionsFile.close();
+            if (assignmentChoice < 1 || assignmentChoice > static_cast<int>(availableAssignments.size())) {
+                cout << "Invalid assignment number!" << endl;
+                return;
+            }
 
-    // Display assignments that are not submitted by the given user
-    cout << "Assignments List for " << username << ":" << endl;
-    cout << "--------------------------------------------" << endl;
-    cout << "Course ID | Assignment" << endl;
-    cout << "--------------------------------------------" << endl;
+            vector<string>& selectedAssignment = availableAssignments[assignmentChoice - 1];
+            if (selectedAssignment.size() <= 2 || selectedAssignment[2] == "None") {
+                cout << "No resource available for this assignment." << endl;
+                return;
+            }
 
-    while (getline(assignmentsFile, line)) {
-        vector<string> assignmentData = split(line, ',');
-        if (assignmentData.size() < 2) {
-            continue; // Skip invalid entries
-        }
+            string resource = selectedAssignment[2];
+            bool isLink = resource.find("http://") == 0 || resource.find("https://") == 0;
 
-        string courseId = assignmentData[0];
-        string assignmentName = assignmentData[1];
-
-        if (submittedAssignments.find({courseId, assignmentName}) == submittedAssignments.end()) {
-            // Assignment not submitted by the user
-            cout << courseId << " | " << assignmentName << endl;
-            cout << "--------------------------------------------" << endl;
+            cout << "\nOpening " << (isLink ? "link" : "file") << ": " << resource << endl;
+            if (!openFile(resource)) {
+                cout << "Error: Could not open the " << (isLink ? "link" : "file") << "." << endl;
+                cout << "Please check if the " << (isLink ? "link is valid" : "file exists and you have permission to access it") << "." << endl;
+            }
         }
     }
-
-    assignmentsFile.close();
-}
+    
     void submitAssignment(const string& username) const {
         ifstream assignmentsFile("../assignments.csv");
         ifstream submissionsFile("../submissions.csv");

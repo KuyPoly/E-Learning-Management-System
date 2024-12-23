@@ -417,48 +417,108 @@ public:
     }
 
     void addAssignment() {
-        vector<string> teacherCourses;
-        ifstream courseFile("../course.csv");
-        string line;
-        while (getline(courseFile, line)) {
-            vector<string> courseDetails = split(line, ',');
-            if (courseDetails.size() >= 2 && courseDetails[1] == username) {
-                teacherCourses.push_back(courseDetails[0]);
+    vector<string> teacherCourses;
+    ifstream courseFile("../course.csv");
+    string line;
+    while (getline(courseFile, line)) {
+        vector<string> courseDetails = split(line, ',');
+        if (courseDetails.size() >= 2 && courseDetails[1] == username) {
+            teacherCourses.push_back(courseDetails[0]);
+        }
+    }
+    courseFile.close();
+
+    if (teacherCourses.empty()) {
+        cout << "You are not assigned to any courses!" << endl;
+        return;
+    }
+
+    cout << "\nYour courses:" << endl;
+    for (size_t i = 0; i < teacherCourses.size(); ++i) {
+        cout << i + 1 << ". " << teacherCourses[i] << endl;
+    }
+
+    int courseChoice;
+    cout << "Select a course (Enter number): ";
+    cin >> courseChoice;
+
+    if (courseChoice < 1 || courseChoice > static_cast<int>(teacherCourses.size())) {
+        cout << "Invalid course selection!" << endl;
+        return;
+    }
+
+    string courseName = teacherCourses[courseChoice - 1];
+    string assignmentTitle;
+    cout << "Enter assignment title: ";
+    cin.ignore();
+    getline(cin, assignmentTitle);
+
+    // Add file/link submission option
+    string submission;
+    while (true) {
+        cout << "\nWould you like to attach a file or link to this assignment?" << endl;
+        cout << "1. Attach file path" << endl;
+        cout << "2. Attach link" << endl;
+        cout << "3. Skip attachment" << endl;
+        cout << "Enter choice: ";
+
+        int attachChoice;
+        cin >> attachChoice;
+        cin.ignore();
+
+        if (attachChoice == 3) {
+            break;
+        }
+
+        cout << "Enter " << (attachChoice == 1 ? "file path" : "link") << " (or type 'exit' to cancel): ";
+        getline(cin, submission);
+
+        // Trim whitespace
+        submission.erase(0, submission.find_first_not_of(" \t\n\r"));
+        submission.erase(submission.find_last_not_of(" \t\n\r") + 1);
+
+        if (submission == "exit") {
+            cout << "Attachment cancelled." << endl;
+            break;
+        }
+
+        if (submission.empty()) {
+            cout << "Submission cannot be empty." << endl;
+            continue;
+        }
+
+        if (attachChoice == 1) {  // File path
+            if (submission.find(":\\") != string::npos || submission.find("/") != string::npos) {
+                break;  // Valid file path
+            } else {
+                cout << "Invalid file path!" << endl;
+                cout << "---------------------||------------------------" << endl;
+                continue;
+            }
+        } else if (attachChoice == 2) {  // Link
+            if (submission.find("http://") == 0 || submission.find("https://") == 0) {
+                break;  // Valid link
+            } else {
+                cout << "Invalid link! Must start with http:// or https://" << endl;
+                cout << "---------------------||------------------------" << endl;
+                continue;
             }
         }
-        courseFile.close();
-
-        if (teacherCourses.empty()) {
-            cout << "You are not assigned to any courses!" << endl;
-            return;
-        }
-
-        cout << "\nYour courses:" << endl;
-        for (size_t i = 0; i < teacherCourses.size(); ++i) {
-            cout << i + 1 << ". " << teacherCourses[i] << endl;
-        }
-
-        int courseChoice;
-        cout << "Select a course (Enter number): ";
-        cin >> courseChoice;
-
-        if (courseChoice < 1 || courseChoice > static_cast<int>(teacherCourses.size())) {
-            cout << "Invalid course selection!" << endl;
-            return;
-        }
-
-        string courseName = teacherCourses[courseChoice - 1];
-        string assignmentTitle;
-        cout << "Enter assignment title: ";
-        cin.ignore();
-        getline(cin, assignmentTitle);
-
-        ofstream file("../assignments.csv", ios::app);
-        file << courseName << "," << assignmentTitle << endl;
-        file.close();
-
-        cout << "Assignment added successfully!" << endl;
     }
+
+    ofstream file("../assignments.csv", ios::app);
+    if (!submission.empty()) {
+        file << courseName << "," << assignmentTitle << "," << submission << endl;
+    } else {
+        file << courseName << "," << assignmentTitle << endl;
+    }
+    file.close();
+
+    cout << "Assignment added successfully!" << endl;
+    if (!submission.empty()) {
+        cout << "Attachment: " << submission << endl;
+    }
+}
 
     void gradeAssignment() {
        try {
