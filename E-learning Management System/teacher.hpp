@@ -589,17 +589,149 @@ public:
        }
    }
 
-    void manageAssignments() {
-        int choice;
-        do {
-            cout << "\n=== Assignment Management ===\n";
-            cout << "1. Add Assignment\n";
-            cout << "2. Grade Assignment\n";
-            cout << "3. Back to Main Menu\n";
-            cout << "Enter your choice: ";
-            cin >> choice;
+   void deleteAssignment() {
+    // Get teacher's courses
+    vector<string> teacherCourses;
+    ifstream courseFile("../course.csv");
+    if (!courseFile.is_open()) {
+        cout << "Error: Unable to open course file!" << endl;
+        return;
+    }
 
-            switch (choice) {
+    string line;
+    while (getline(courseFile, line)) {
+        vector<string> courseDetails = split(line, ',');
+        if (courseDetails.size() >= 2 && courseDetails[1] == username) {
+            teacherCourses.push_back(courseDetails[0]);
+        }
+    }
+    courseFile.close();
+
+    if (teacherCourses.empty()) {
+        cout << "You are not assigned to any courses!" << endl;
+        return;
+    }
+
+    // Read all assignments and filter by teacher's courses
+    vector<pair<string, string>> teacherAssignments; // pairs of (course, assignment)
+    ifstream assignFile("../assignments.csv");
+    if (!assignFile.is_open()) {
+        cout << "Error: Unable to open assignments file!" << endl;
+        return;
+    }
+
+    while (getline(assignFile, line)) {
+        vector<string> assignDetails = split(line, ',');
+        if (assignDetails.size() >= 2) {
+            // Check if assignment belongs to teacher's course
+            if (find(teacherCourses.begin(), teacherCourses.end(), assignDetails[0]) != teacherCourses.end()) {
+                teacherAssignments.push_back({assignDetails[0], assignDetails[1]});
+            }
+        }
+    }
+    assignFile.close();
+
+    if (teacherAssignments.empty()) {
+        cout << "No assignments found in your courses!" << endl;
+        return;
+    }
+
+    // Display assignments
+    cout << "\nYour Assignments:" << endl;
+    cout << "----------------" << endl;
+    for (size_t i = 0; i < teacherAssignments.size(); ++i) {
+        cout << i + 1 << ". Course: " << teacherAssignments[i].first 
+             << ", Assignment: " << teacherAssignments[i].second << endl;
+    }
+
+    // Get user choice
+    int choice;
+    cout << "\nSelect assignment to delete (Enter number): ";
+    cin >> choice;
+
+    if (choice < 1 || choice > static_cast<int>(teacherAssignments.size())) {
+        cout << "Invalid selection!" << endl;
+        return;
+    }
+
+    string selectedCourse = teacherAssignments[choice-1].first;
+    string selectedAssignment = teacherAssignments[choice-1].second;
+
+    // 1. Delete from assignments.csv
+    vector<string> updatedAssignments;
+    ifstream readAssignFile("../assignments.csv");
+    while (getline(readAssignFile, line)) {
+        vector<string> assignDetails = split(line, ',');
+        if (assignDetails.size() >= 2) {
+            if (!(assignDetails[0] == selectedCourse && 
+                  assignDetails[1] == selectedAssignment)) {
+                updatedAssignments.push_back(line);
+            }
+        }
+    }
+    readAssignFile.close();
+
+    ofstream writeAssignFile("../assignments.csv");
+    for (const string& assignment : updatedAssignments) {
+        writeAssignFile << assignment << endl;
+    }
+    writeAssignFile.close();
+
+    // 2. Delete from submissions.csv
+    vector<string> updatedSubmissions;
+    ifstream readSubmissionFile("../submissions.csv");
+    while (getline(readSubmissionFile, line)) {
+        vector<string> submissionDetails = split(line, ',');
+        if (submissionDetails.size() >= 3) {
+            if (!(submissionDetails[1] == selectedCourse && 
+                  submissionDetails[2] == selectedAssignment)) {
+                updatedSubmissions.push_back(line);
+            }
+        }
+    }
+    readSubmissionFile.close();
+
+    ofstream writeSubmissionFile("../submissions.csv");
+    for (const string& submission : updatedSubmissions) {
+        writeSubmissionFile << submission << endl;
+    }
+    writeSubmissionFile.close();
+
+    // 3. Delete from grades.csv
+    vector<string> updatedGrades;
+    ifstream readGradeFile("../grades.csv");
+    while (getline(readGradeFile, line)) {
+        vector<string> gradeDetails = split(line, ',');
+        if (gradeDetails.size() >= 3) {
+            if (!(gradeDetails[0] == selectedCourse && 
+                  gradeDetails[1] == selectedAssignment)) {
+                updatedGrades.push_back(line);
+            }
+        }
+    }
+    readGradeFile.close();
+
+    ofstream writeGradeFile("../grades.csv");
+    for (const string& grade : updatedGrades) {
+        writeGradeFile << grade << endl;
+    }
+    writeGradeFile.close();
+
+    cout << "Assignment and related submissions/grades deleted successfully!" << endl;
+}
+
+    void manageAssignments() {
+    int choice;
+    do {
+        cout << "\n=== Assignment Management ===\n";
+        cout << "1. Add Assignment\n";
+        cout << "2. Grade Assignment\n";
+        cout << "3. Delete Assignment\n";  // New option
+        cout << "4. Back to Main Menu\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
                 case 1:
                     addAssignment();
                     break;
@@ -607,12 +739,15 @@ public:
                     gradeAssignment();
                     break;
                 case 3:
+                    deleteAssignment();  // New case
+                    break;
+                case 4:
                     cout << "Returning to main menu...\n";
                     break;
                 default:
                     cout << "Invalid choice!\n";
             }
-        } while (choice != 3);
+        } while (choice != 4);
     }
 
     void displayStudentInfo() {
