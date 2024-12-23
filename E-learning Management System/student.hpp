@@ -743,7 +743,7 @@ void viewAssignments(const string& username) const {
             default:
                 cout << "Invalid choice!\n";
         }
-    } while (choice != 4);
+    } while (choice != 6);
 }
 
 void manageProfile() {
