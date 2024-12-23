@@ -37,13 +37,13 @@ public:
 
         string line;
         bool foundCourse = false; // To track if any courses are found
-
+        cout << "--------------------------------------------" << endl;
         cout << "Your Enrolled Courses:" << endl;
-
         cout << "--------------------------------------------" << endl;
         cout << "Course ID | Instructor Name" << endl;
-        cout << "--------------------------------------------" << endl;
-
+        cout << "--------------------------------------------" << endl<<endl;
+        system("pause");
+        system("cls");
         while (getline(file, line)) {
             vector<string> data = split(line, ',');
             for (size_t i = 2; i < data.size(); i++) { // Check names starting from data[2]
@@ -70,6 +70,8 @@ public:
         bool exit_loop = false;
 
         do {
+
+            cout<<"---------- change your password ----------\n"<<endl;
             cout << "Enter your old password: ";
             cin >> old_password;
 
@@ -94,20 +96,22 @@ public:
                         
                         // Allowing passwords 6 or more characters long
                         if (new_password.length() < 6) {
-                            cout << "New password must be than 6 characters!" << endl;
+                            cout << "New password must be than 6 characters!" << endl<<endl;  
                             lines.push_back(line);
                             continue;
 
                         }
 
                         if (new_password != confirm_password) {
-                            cout << "Passwords do not match!" << endl;
+                            cout << "Passwords do not match!" << endl<<endl;
                             lines.push_back(line);
                             continue;
                         }
 
                         lines.push_back(data[0] + "," + new_password);
                         cout << "Password updated successfully!" << endl;
+                        system("pause");
+                        system("cls");
                         password_updated = true;
                     } else {
                         cout << "Old password is incorrect!" << endl;
@@ -137,7 +141,9 @@ public:
                 cout << "Press 1 to try again or 2 to exit: ";
                 int choice;
                 cin >> choice;
+                system("cls");
                 if (choice == 2) {
+                    system("cls");
                     exit_loop = true;
                 }
             }
@@ -188,7 +194,6 @@ public:
         int choice;
         cout << "Enter the number of the lesson to view more details (or 0 to exit): ";
         cin >> choice;
-        system("cls");
 
         if (choice == 0) {
             cout << "Exiting lesson view.\n";
@@ -196,6 +201,8 @@ public:
             return;
         } else if (choice < 1 || choice > lessons.size()) {
             cout << "Invalid choice.\n";
+            system("pause");
+            system("cls");
             return;
         }
 
@@ -296,6 +303,8 @@ void viewAssignments(const string& username) const {
 
             if (assignmentChoice < 1 || assignmentChoice > static_cast<int>(availableAssignments.size())) {
                 cout << "Invalid assignment number!" << endl;
+                system("pause");
+                system("cls");
                 return;
             }
 
@@ -392,6 +401,8 @@ void viewAssignments(const string& username) const {
         cin >> choice;
         if (choice < 1 || choice > availableAssignments.size()) {
             cout << "Invalid choice!" << endl;
+            system("pause");
+            system("cls");
             return;
         }
 
@@ -413,6 +424,8 @@ void viewAssignments(const string& username) const {
 
             if (submission == "exit") {
                 cout << "Exiting the process." << endl;
+                system("pause");
+                system("cls");
                 return;
             }
 
@@ -426,9 +439,10 @@ void viewAssignments(const string& username) const {
             } else if (submission.find(":\\") != string::npos || submission.find("/") != string::npos) {
                 break; // Valid file path
             } else {
-                cout << "Invalid!" << endl;
+                cout << "Invalid! Please try again" << endl;
                 cout << "---------------------||------------------------" << endl;
-                cout << "Please try again!" << endl;
+                system("pause");
+                system("cls");
             }
         }
 
@@ -445,9 +459,13 @@ void viewAssignments(const string& username) const {
         if (isLink) {
             submissionsFileOut << username << "," << selectedCourse << "," << selectedAssignment << "," << submission << endl;
             cout << "Link submitted successfully!" << endl;
+            system("pause");
+            system("cls");
         } else {
             submissionsFileOut << username << "," << selectedCourse << "," << selectedAssignment << "," << submission << endl;
             cout << "File submitted successfully!" << endl;
+            system("pause");
+            system("cls");
         }
 
         submissionsFileOut.close();
@@ -496,6 +514,8 @@ void viewAssignments(const string& username) const {
 
         if (choice < 1 || choice > submissions.size()) {
             cout << "Invalid choice!" << endl;
+            system("pause");
+            system("cls");
             return;
         }
 
@@ -516,6 +536,8 @@ void viewAssignments(const string& username) const {
 
         submissionsOutFile.close();
         cout << "Submission deleted successfully!" << endl;
+        system("pause");
+        system("cls");
     }
 
 
@@ -559,7 +581,9 @@ void viewAssignments(const string& username) const {
             }
         cout << endl;
         }
-        cout << "------------------------------------------------------" << endl;
+        cout << "------------------------------------------------------" << endl<<endl;
+        system("pause");
+        system("cls");
     }
 
     void viewProgress() const {
@@ -650,7 +674,9 @@ void viewAssignments(const string& username) const {
                 }
             }
             cout << " | " << average << endl;
-            cout << "---------------------------------------------------------------" << endl;
+            cout << "---------------------------------------------------------------" << endl<<endl;
+            system("pause");
+            system("cls");
         }
 
         progressFile.close();
@@ -712,6 +738,8 @@ void viewAssignments(const string& username) const {
             cout << endl;
         }
         cout << "---------------------------------------------------" << endl;
+        system("pause");
+        system("cls");
     }
 
     /*MENU*/
