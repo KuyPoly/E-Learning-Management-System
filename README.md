@@ -1,8 +1,5 @@
-E-Learning Management System is a system design for students to study any course throough electronic. In this project we will implement three main function which are student, teacher, and admin.
-- Admin Previledge
-  Admin can add, delete and view users information
-- Teacher
-  Teacher are allow to view their own information,add course, update or change course, add assignment, upload materials, grade and view their students progress.
-- Student
-  Students are allow to enroll and drop in any course that are available, view course material and assigment, submit assignment, and view grade.
-
+The E-Learning Management System (ELMS) is a program that was developed using C++ to manage academic workflow in highschool and university. ELMS provides a comprehensive tool for administrators, teachers, and students to perform their respective tasks seamlessly. This system is designed with a focus on user accessibility, security, and scalability, ensuring that it meets the diverse requirements of modern educational institutions. The system aims to enhance efficiency, improve communication, and streamline processes such as course management, assignments, lessons, and progress tracking. The system also includes files for storing and managing data.
+Key features include:
+- Role-based access for Admins, Teachers, and Students.
+- Secure login and authentication.
+- Functionality tailored to each role, such as user management for Admins, lesson planning for Teachers, and progress tracking for Students.
