@@ -42,8 +42,6 @@ public:
         cout << "--------------------------------------------" << endl;
         cout << "Course ID | Instructor Name" << endl;
         cout << "--------------------------------------------" << endl<<endl;
-        system("pause");
-        system("cls");
         while (getline(file, line)) {
             vector<string> data = split(line, ',');
             for (size_t i = 2; i < data.size(); i++) { // Check names starting from data[2]
@@ -61,6 +59,8 @@ public:
         }
 
         cout << "--------------------------------------------" << endl;
+        system("pause");
+        system("cls");
         file.close();
     }
 
